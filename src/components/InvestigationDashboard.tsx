@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import ReactDOM from 'react-dom/client'; // Import ReactDOM for client-side rendering
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -13,7 +14,9 @@ import { PhotoManagementSection } from './dashboard/PhotoManagementSection';
 import { ConclusionsSection } from './dashboard/ConclusionsSection';
 import { PrivacySection } from './dashboard/PrivacySection';
 import { ReportPreview } from './dashboard/ReportPreview';
+import { ReportContent } from './dashboard/ReportContent'; // Import ReportContent
 import { useInvestigationData } from '@/hooks/useInvestigationData';
+import html2pdf from 'html2pdf.js'; // Import html2pdf
 
 export const InvestigationDashboard = () => {
   const [showPreview, setShowPreview] = useState(false);
@@ -24,10 +27,32 @@ export const InvestigationDashboard = () => {
     setIsLoaded(true);
   }, []);
 
-  // The actual PDF export logic is now handled within ReportPreview
-  const handleExportPDF = () => {
-    // This button will now just open the preview, where the export button is
-    setShowPreview(true);
+  const handleDirectExportPDF = async () => {
+    // Create a temporary div to render the report content
+    const tempDiv = document.createElement('div');
+    // Apply styles to hide it but allow rendering
+    tempDiv.style.position = 'absolute';
+    tempDiv.style.left = '-9999px';
+    tempDiv.style.top = '-9999px';
+    tempDiv.style.width = '210mm'; // A4 width
+    tempDiv.style.height = '297mm'; // A4 height
+    tempDiv.style.overflow = 'hidden';
+    document.body.appendChild(tempDiv);
+
+    // Render the ReportContent into the temporary div
+    const root = ReactDOM.createRoot(tempDiv);
+    root.render(<ReportContent data={data} />);
+
+    // Wait for the content to render and styles to apply
+    // A small timeout is often necessary for html2pdf.js to capture everything correctly
+    await new Promise(resolve => setTimeout(resolve, 500)); // Adjust delay if needed
+
+    // Generate PDF
+    html2pdf().from(tempDiv).save('Relazione_Investigativa.pdf').then(() => {
+      // Clean up: unmount the React component and remove the temporary div
+      root.unmount();
+      document.body.removeChild(tempDiv);
+    });
   };
 
   const getCompletionStats = () => {
@@ -98,7 +123,7 @@ export const InvestigationDashboard = () => {
                 <span>Anteprima</span>
               </Button>
               <Button
-                onClick={handleExportPDF} // This will now open the preview
+                onClick={handleDirectExportPDF} // Direct PDF export
                 className="falco-gradient text-white hover:opacity-90 flex items-center space-x-2 floating-button"
               >
                 <Download className="w-4 h-4" />
@@ -106,8 +131,7 @@ export const InvestigationDashboard = () => {
               </Button>
             </div>
           </div>
-        </div>
-      </header>
+        </header>
 
       <div className="max-w-7xl mx-auto px-6 py-8">
         {showPreview ? (

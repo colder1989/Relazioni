@@ -13,12 +13,8 @@ interface ReportPreviewProps {
 export const ReportPreview = ({ data, onClose }: ReportPreviewProps) => {
   const reportRef = useRef<HTMLDivElement>(null);
 
-  const handleExportPDF = () => {
-    if (reportRef.current) {
-      const element = reportRef.current;
-      html2pdf().from(element).save('Relazione_Investigativa.pdf');
-    }
-  };
+  // The handleExportPDF function is no longer needed here as the main dashboard button handles it directly.
+  // This component is now purely for previewing.
 
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
@@ -31,10 +27,7 @@ export const ReportPreview = ({ data, onClose }: ReportPreviewProps) => {
             <h2 className="text-xl font-bold text-steel-900">Anteprima Report Investigativo</h2>
           </div>
           <div className="flex items-center space-x-2">
-            <Button size="sm" className="falco-gradient text-white" onClick={handleExportPDF}>
-              <Download className="w-4 h-4 mr-2" />
-              Esporta PDF
-            </Button>
+            {/* Removed the export button from here */}
             <Button variant="outline" size="sm" onClick={onClose} className="text-steel-700 hover:text-steel-900">
               <X className="w-4 h-4" />
             </Button>
