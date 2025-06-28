@@ -4,15 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useSession } from '@/components/SessionContextProvider';
 import { useToast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+// Importazioni rimosse per semplificazione: Avatar, DropdownMenu
 import { LogOut, LayoutDashboard, UserCircle, Shield } from 'lucide-react';
 
 interface MainLayoutProps {
@@ -24,33 +16,8 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const handleSignOut = async () => {
-    try {
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
-      toast({
-        title: "Disconnessione",
-        description: "Sei stato disconnesso con successo.",
-      });
-      // SessionContextProvider will handle the redirect to /login
-    } catch (error) {
-      console.error('Error signing out:', error);
-      toast({
-        title: "Errore",
-        description: "Impossibile effettuare il logout.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const getUserInitials = (email: string | undefined) => {
-    if (!email) return '??';
-    const parts = email.split('@')[0].split('.');
-    if (parts.length > 1) {
-      return (parts[0][0] + parts[1][0]).toUpperCase();
-    }
-    return parts[0].substring(0, 2).toUpperCase();
-  };
+  // La logica di handleSignOut è stata spostata o sarà gestita altrove per questa fase di debug
+  // const handleSignOut = async () => { /* ... */ };
 
   return (
     <div className="min-h-screen flex flex-col bg-steel-900">
@@ -72,40 +39,8 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
               <UserCircle className="w-4 h-4" />
               <span>Profilo</span>
             </Link>
-
-            {!isSessionLoading && session?.user ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="relative h-9 w-9 rounded-full">
-                    <Avatar className="h-9 w-9">
-                      <AvatarImage src={session.user.user_metadata.avatar_url} alt={session.user.email || "User"} />
-                      <AvatarFallback className="bg-falco-navy text-white">
-                        {getUserInitials(session.user.email)}
-                      </AvatarFallback>
-                    </Avatar>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56 bg-steel-800 border border-steel-700 text-slate-100" align="end" forceMount>
-                  <DropdownMenuLabel className="font-normal">
-                    <div className="flex flex-col space-y-1">
-                      <p className="text-sm font-medium leading-none">{session.user.email}</p>
-                      <p className="text-xs leading-none text-slate-400">
-                        {session.user.user_metadata.first_name} {session.user.user_metadata.last_name}
-                      </p>
-                    </div>
-                  </DropdownMenuLabel>
-                  <DropdownMenuSeparator className="bg-steel-700" />
-                  <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer hover:bg-steel-700">
-                    <LogOut className="mr-2 h-4 w-4" />
-                    <span>Log out</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            ) : (
-              <Link to="/login">
-                <Button variant="outline" className="floating-button">Accedi</Button>
-              </Link>
-            )}
+            {/* Per questa fase di debug, il pulsante di login/logout è rimosso dal layout principale */}
+            {/* Sarà gestito dalle singole pagine o reintrodotto in seguito */}
           </nav>
         </div>
       </header>
