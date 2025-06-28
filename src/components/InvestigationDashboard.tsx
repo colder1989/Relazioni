@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { FileText, Download, Eye, Plus, CheckCircle, Clock, AlertCircle, Shield, Search, LogOut, UserCircle } from 'lucide-react';
+import { FileText, Download, Eye, Plus, CheckCircle, Clock, AlertCircle, Shield, Search, LogOut, UserCircle, Loader2 } from 'lucide-react';
 import { ClientInfoSection } from './dashboard/ClientInfoSection';
 import { InvestigatedInfoSection } from './dashboard/InvestigatedInfoSection';
 import { MandateDetailsSection } from './dashboard/MandateDetailsSection';
@@ -14,12 +14,12 @@ import { PhotoManagementSection } from './dashboard/PhotoManagementSection';
 import { ConclusionsSection } from './dashboard/ConclusionsSection';
 import { PrivacySection } from './dashboard/PrivacySection';
 import { ReportPreview } from './dashboard/ReportPreview';
-import { ReportContent } from './dashboard/ReportContent';
+import { ReportContent } from './ReportContent'; // Corrected import path
 import { useInvestigationData } from '@/hooks/useInvestigationData';
-import { useSession } from '@/components/SessionContextProvider'; // Import useSession
-import { supabase } from '@/integrations/supabase/client'; // Import supabase client
+import { useSession } from '@/components/SessionContextProvider';
+import { supabase } from '@/integrations/supabase/client';
 import html2pdf from 'html2pdf.js';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate
+import { useNavigate } from 'react-router-dom';
 
 interface AgencyProfile {
   first_name: string;
@@ -36,9 +36,9 @@ export const InvestigationDashboard = () => {
   const [showPreview, setShowPreview] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const [agencyProfile, setAgencyProfile] = useState<AgencyProfile | null>(null);
-  const { data, updateData, resetData } = useInvestigationData();
+  const { data, updateData, resetData, isLoadingReport } = useInvestigationData();
   const { session, isLoading: isSessionLoading } = useSession();
-  const navigate = useNavigate(); // Initialize useNavigate
+  const navigate = useNavigate();
 
   useEffect(() => {
     setIsLoaded(true);
@@ -91,10 +91,8 @@ export const InvestigationDashboard = () => {
     try {
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
-      // The SessionContextProvider will handle the redirect to /login
     } catch (error) {
       console.error('Error signing out:', error);
-      // Optionally show a toast error
     }
   };
 
@@ -129,6 +127,15 @@ export const InvestigationDashboard = () => {
     if (stats.percentage >= 50) return "status-progress";
     return "status-pending";
   };
+
+  if (isLoadingReport || isSessionLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-steel-900 text-slate-300">
+        <Loader2 className="mr-2 h-8 w-8 animate-spin" />
+        Caricamento report...
+      </div>
+    );
+  }
 
   return (
     <div className={`min-h-screen transition-all duration-1000 ${isLoaded ? 'fade-in' : 'opacity-0'}`}>
