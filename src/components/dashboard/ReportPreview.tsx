@@ -30,7 +30,6 @@ export const ReportPreview = ({ data, agencyProfile, onClose }: ReportPreviewPro
   useEffect(() => {
     const preparePreview = async () => {
       setIsPreparingPreview(true);
-      // Passa i dati originali a ReportContent, sarà ReportContent a usare il proxy
       setPreviewAgencyProfile(agencyProfile);
       setPreviewData(data);
       setIsPreparingPreview(false);
@@ -68,14 +67,16 @@ export const ReportPreview = ({ data, agencyProfile, onClose }: ReportPreviewPro
       await Promise.all(imageLoadPromises);
 
       // Add a small additional delay to ensure all rendering is complete
-      await new Promise(resolve => setTimeout(resolve, 2000)); // Aumentato il ritardo
+      await new Promise(resolve => setTimeout(resolve, 2000));
 
-      console.log("Content of reportRef.current before PDF generation:", reportRef.current.innerHTML); // Debugging log
+      console.log("Content of reportRef.current before PDF generation:", reportRef.current.innerHTML);
 
       try {
         await html2pdf().set({ 
-          html2canvas: { useCORS: true, scale: 2, allowTaint: true }, // Aggiunto allowTaint
-          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+          html2canvas: { useCORS: true, scale: 2, allowTaint: true },
+          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+          pagebreak: { mode: ['css', 'legacy'] }, // Migliora la gestione dei salti pagina
+          margin: [20, 15, 20, 15] // Margini per il PDF (top, left, bottom, right)
         }).from(reportRef.current).save('Relazione_Investigativa_Anteprima.pdf');
 
         toast({
@@ -132,7 +133,12 @@ export const ReportPreview = ({ data, agencyProfile, onClose }: ReportPreviewPro
         ) : (
           <div className="overflow-y-auto flex-grow" ref={reportRef}>
             {previewData && previewAgencyProfile && (
-              <ReportContent data={previewData} agencyProfile={previewAgencyProfile} className="p-8 font-inter text-sm leading-relaxed bg-falco-cream text-steel-900" />
+              <>
+                {/* Render cover page */}
+                <ReportContent data={previewData} agencyProfile={previewAgencyProfile} isCoverPage={true} className="print-page-break" />
+                {/* Render subsequent pages content */}
+                <ReportContent data={previewData} agencyProfile={previewAgencyProfile} isCoverPage={false} />
+              </>
             )}
           </div>
         )}

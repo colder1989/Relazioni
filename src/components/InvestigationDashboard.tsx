@@ -82,34 +82,41 @@ export const InvestigationDashboard = () => {
       duration: 3000,
     });
 
-    let tempAgencyProfile = agencyProfile;
-    let tempPhotos: Photo[] = [];
-    let tempDiv: HTMLDivElement | null = null; // Declare tempDiv here
-    let root: ReactDOM.Root | null = null; // Declare root here
+    let tempDiv: HTMLDivElement | null = null;
+    let root: ReactDOM.Root | null = null;
 
     try {
-      tempAgencyProfile = agencyProfile;
-      tempPhotos = data.photos;
-
       tempDiv = document.createElement('div');
       document.body.appendChild(tempDiv);
 
       root = ReactDOM.createRoot(tempDiv);
       root.render(
-        <ReportContent 
-          data={{ ...data, photos: tempPhotos }} 
-          agencyProfile={tempAgencyProfile} 
-          className="p-8 font-inter text-sm leading-relaxed bg-falco-cream text-steel-900" 
-        />
+        <>
+          {/* Render cover page */}
+          <ReportContent 
+            data={data} 
+            agencyProfile={agencyProfile} 
+            isCoverPage={true} 
+            className="print-page-break" 
+          />
+          {/* Render subsequent pages content */}
+          <ReportContent 
+            data={data} 
+            agencyProfile={agencyProfile} 
+            isCoverPage={false} 
+          />
+        </>
       );
 
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise(resolve => setTimeout(resolve, 2000)); // Give React time to render
 
       console.log("Content of tempDiv before PDF generation:", tempDiv.innerHTML);
 
       await html2pdf().set({ 
         html2canvas: { useCORS: true, scale: 2, allowTaint: true },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+        pagebreak: { mode: ['css', 'legacy'] }, // Migliora la gestione dei salti pagina
+        margin: [20, 15, 20, 15] // Margini per il PDF (top, left, bottom, right)
       }).from(tempDiv).save('Relazione_Investigativa.pdf');
       
       toast({
@@ -125,7 +132,7 @@ export const InvestigationDashboard = () => {
       });
     } finally {
       setIsExporting(false);
-      if (root && tempDiv && tempDiv.parentNode) { // Check if root and tempDiv are not null
+      if (root && tempDiv && tempDiv.parentNode) {
         root.unmount();
         document.body.removeChild(tempDiv);
       }
@@ -227,7 +234,7 @@ export const InvestigationDashboard = () => {
                 ) : (
                   <Download className="w-4 h-4" />
                 )}
-                <span>{isExporting ? 'Esportazione...' : 'Esporta PDF'}</span>
+                <span>{isExporting ? 'Esporta PDF' : 'Esporta PDF'}</span>
               </Button>
               <Button
                 variant="outline"

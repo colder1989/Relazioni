@@ -12,10 +12,11 @@ interface ReportContentProps {
     agency_website: string;
     agency_logo_url: string;
   } | null;
-  className?: string; // Add className prop
+  className?: string;
+  isCoverPage?: boolean; // Nuovo prop per indicare se è la pagina di copertina
 }
 
-export const ReportContent = ({ data, agencyProfile, className }: ReportContentProps) => {
+export const ReportContent = ({ data, agencyProfile, className, isCoverPage = false }: ReportContentProps) => {
   const formatDate = (dateString: string) => {
     if (!dateString) return '';
     return new Date(dateString).toLocaleDateString('it-IT');
@@ -45,55 +46,99 @@ export const ReportContent = ({ data, agencyProfile, className }: ReportContentP
   // Logo di fallback incorporato come stringa Base64 (un'icona di scudo semplice)
   const FALLBACK_LOGO_BASE64 = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJsdWNpZGUgbHVjaWRlLXnoaWVsZCI+PHBhdGggZD0iTTEyIDIyczgtNCA4LTEwVjVsLTgtMy04IDN2N2MwIDYgOCAxMCA4IDEweiIvPjwvc3ZnPg==";
 
+  const Header = () => (
+    <div className="flex justify-between items-center mb-4 text-xs text-steel-700">
+      <div className="flex items-center space-x-2">
+        {agencyProfile?.agency_logo_url ? (
+          <img 
+            src={getProxyImageUrl(agencyProfile.agency_logo_url)} 
+            alt={agencyProfile.agency_name || "Agency Logo"} 
+            className="h-10 w-auto object-contain"
+            crossOrigin="anonymous"
+          />
+        ) : (
+          <img 
+            src={FALLBACK_LOGO_BASE64} 
+            alt="Falco Investigation Logo" 
+            className="h-10 w-auto"
+            crossOrigin="anonymous"
+          />
+        )}
+        <span className="font-bold text-steel-900">{agencyProfile?.agency_name || "FALCO INVESTIGATION"}</span>
+        <span className="text-steel-700"> - Relazione Investigativa</span>
+      </div>
+      {/* Page number will be added by html2pdf.js if configured */}
+    </div>
+  );
+
+  const Footer = () => (
+    <div className="text-center text-xs text-steel-700 mt-8">
+      <p>{agencyProfile?.agency_name || "FALCO INVESTIGATION"} - {agencyProfile?.agency_address || "20124 MILANO (MI) – VIA SABAUDIA 8"}</p>
+      <p>Tel {agencyProfile?.agency_phone || "+39 02 82 19 79 69"} - P.Iva IT11535690967</p>
+      <p>Autorizzazione Prefettura Milano Prot. 14816/12B15E Area I OSP</p>
+      <p>{agencyProfile?.agency_email || "milano@falcoinvestigation.it"} - {agencyProfile?.agency_website || "WWW.INVESTIGATIONFALCO.IT"}</p>
+    </div>
+  );
+
+  if (isCoverPage) {
+    return (
+      <div className={cn("p-8 font-inter text-sm leading-relaxed bg-falco-cream text-steel-900 min-h-[297mm] flex flex-col justify-between", className)}>
+        <div>
+          {/* Header for cover page - larger logo */}
+          <div className="flex justify-between items-start mb-24">
+            {agencyProfile?.agency_logo_url ? (
+              <img 
+                src={getProxyImageUrl(agencyProfile.agency_logo_url)} 
+                alt={agencyProfile.agency_name || "Agency Logo"} 
+                className="h-32 w-auto object-contain"
+                crossOrigin="anonymous"
+              />
+            ) : (
+              <img 
+                src={FALLBACK_LOGO_BASE64} 
+                alt="Falco Investigation Logo" 
+                className="h-32 w-auto"
+                crossOrigin="anonymous"
+              />
+            )}
+            <div className="text-right text-xs text-steel-700">
+              <p className="font-bold">{agencyProfile?.agency_name || "FALCO INVESTIGATION"}</p>
+              <p>{agencyProfile?.agency_address || "20124 MILANO (MI) – VIA SABAUDIA 8"}</p>
+              <p>Tel {agencyProfile?.agency_phone || "+39 02 82 19 79 69"} - P.Iva IT11535690967</p>
+              <p>Autorizzazione Prefettura Milano Prot. 14816/12B15E Area I OSP</p>
+              <p>{agencyProfile?.agency_email || "milano@falcoinvestigation.it"} - {agencyProfile?.agency_website || "WWW.INVESTIGATIONFALCO.IT"}</p>
+              <p className="mt-4 text-steel-900 font-medium">Milano, {formatDateLong(today)}</p>
+            </div>
+          </div>
+
+          {/* Recipient Address */}
+          {data.clientInfo.fullName && (
+            <div className="mb-24 text-left">
+              <p className="font-bold">Spett.le {data.clientInfo.fullName}</p>
+              {data.clientInfo.address && <p>{data.clientInfo.address}</p>}
+            </div>
+          )}
+
+          {/* Subject */}
+          <div className="text-center mb-8">
+            <h1 className="text-2xl font-playfair font-bold mb-2 text-steel-900">OGGETTO: RELAZIONE INVESTIGATIVA</h1>
+            {data.mandateDetails.assignmentDate && (
+              <p className="text-lg font-medium text-steel-900">Riferimento Vostro incarico del {formatDate(data.mandateDetails.assignmentDate)}</p>
+            )}
+            {data.investigatedInfo.fullName && (
+              <p className="text-lg font-medium text-steel-900">Persona di cui si chiede l'osservazione: {data.investigatedInfo.fullName}</p>
+            )}
+          </div>
+        </div>
+        {/* No footer on cover page */}
+      </div>
+    );
+  }
+
   return (
     <div className={cn("p-8 font-inter text-sm leading-relaxed bg-falco-cream text-steel-900", className)}>
+      <Header />
       <div className="space-y-8 max-w-3xl mx-auto">
-        {/* Header with Logo and Date */}
-        <div className="flex justify-between items-start mb-8">
-          {agencyProfile?.agency_logo_url ? (
-            <img 
-              src={getProxyImageUrl(agencyProfile.agency_logo_url)} 
-              alt={agencyProfile.agency_name || "Agency Logo"} 
-              className="h-24 w-auto object-contain"
-              crossOrigin="anonymous"
-            />
-          ) : (
-            <img 
-              src={FALLBACK_LOGO_BASE64} 
-              alt="Falco Investigation Logo" 
-              className="h-24 w-auto"
-              crossOrigin="anonymous"
-            />
-          )}
-          <div className="text-right text-xs text-steel-700">
-            <p className="font-bold">{agencyProfile?.agency_name || "FALCO INVESTIGATION"}</p>
-            <p>{agencyProfile?.agency_address || "20124 MILANO (MI) – VIA SABAUDIA 8"}</p>
-            <p>Tel {agencyProfile?.agency_phone || "+39 02 82 19 79 69"} - P.Iva IT11535690967</p>
-            <p>Autorizzazione Prefettura Milano Prot. 14816/12B15E Area I OSP</p>
-            <p>{agencyProfile?.agency_email || "milano@falcoinvestigation.it"} - {agencyProfile?.agency_website || "WWW.INVESTIGATIONFALCO.IT"}</p>
-            <p className="mt-4 text-steel-900 font-medium">Milano, {formatDateLong(today)}</p>
-          </div>
-        </div>
-
-        {/* Recipient Address */}
-        {data.clientInfo.fullName && (
-          <div className="mb-8 text-left">
-            <p className="font-bold">Spett.le {data.clientInfo.fullName}</p>
-            {data.clientInfo.address && <p>{data.clientInfo.address}</p>}
-          </div>
-        )}
-
-        {/* Subject */}
-        <div className="text-center mb-8">
-          <h1 className="text-xl font-playfair font-bold mb-2 text-steel-900">OGGETTO: RELAZIONE INVESTIGATIVA</h1>
-          {data.mandateDetails.assignmentDate && (
-            <p className="text-base font-medium text-steel-900">Riferimento Vostro incarico del {formatDate(data.mandateDetails.assignmentDate)}</p>
-          )}
-          {data.investigatedInfo.fullName && (
-            <p className="text-base font-medium text-steel-900">Persona di cui si chiede l'osservazione: {data.investigatedInfo.fullName}</p>
-          )}
-        </div>
-
         {/* Introduction/Premise */}
         <div className="mb-8 text-justify">
           <p className="text-steel-900">
@@ -287,6 +332,7 @@ export const ReportContent = ({ data, agencyProfile, className }: ReportContentP
           )}
         </div>
       </div>
+      <Footer />
     </div>
   );
 };
