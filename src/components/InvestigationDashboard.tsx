@@ -20,6 +20,7 @@ import { useSession } from '@/components/SessionContextProvider';
 import { supabase } from '@/integrations/supabase/client';
 import html2pdf from 'html2pdf.js';
 import { useNavigate } from 'react-router-dom';
+import { useToast } from '@/components/ui/use-toast'; // Import useToast
 
 interface AgencyProfile {
   first_name: string;
@@ -39,6 +40,7 @@ export const InvestigationDashboard = () => {
   const { data, updateData, resetData, isLoadingReport } = useInvestigationData();
   const { session, isLoading: isSessionLoading } = useSession();
   const navigate = useNavigate();
+  const { toast } = useToast(); // Initialize useToast
 
   useEffect(() => {
     setIsLoaded(true);
@@ -71,6 +73,12 @@ export const InvestigationDashboard = () => {
   }, [session, isSessionLoading]);
 
   const handleDirectExportPDF = async () => {
+    toast({
+      title: "Esportazione PDF",
+      description: "Preparazione del report per l'esportazione...",
+      duration: 3000,
+    });
+
     const tempDiv = document.createElement('div');
     tempDiv.style.position = 'absolute';
     tempDiv.style.left = '-9999px';
@@ -84,7 +92,7 @@ export const InvestigationDashboard = () => {
     root.render(<ReportContent data={data} agencyProfile={agencyProfile} />);
 
     // Give React time to render the content into the temporary div
-    await new Promise(resolve => setTimeout(resolve, 1000)); 
+    await new Promise(resolve => setTimeout(resolve, 1500)); // Increased delay
 
     // Wait for all images within the temporary div to load
     const images = tempDiv.querySelectorAll('img');
@@ -98,12 +106,29 @@ export const InvestigationDashboard = () => {
     await Promise.all(imageLoadPromises);
 
     // Add a small additional delay to ensure all rendering is complete
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise(resolve => setTimeout(resolve, 1000)); // Increased additional delay
 
-    html2pdf().from(tempDiv).save('Relazione_Investigativa.pdf').then(() => {
+    try {
+      await html2pdf().set({ 
+        html2canvas: { useCORS: true, scale: 2 }, // Added useCORS and increased scale for better quality
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      }).from(tempDiv).save('Relazione_Investigativa.pdf');
+      
+      toast({
+        title: "Successo",
+        description: "Report PDF esportato con successo!",
+      });
+    } catch (error) {
+      console.error('Error exporting PDF:', error);
+      toast({
+        title: "Errore",
+        description: "Impossibile esportare il report PDF.",
+        variant: "destructive",
+      });
+    } finally {
       root.unmount();
       document.body.removeChild(tempDiv);
-    });
+    }
   };
 
   const handleSignOut = async () => {

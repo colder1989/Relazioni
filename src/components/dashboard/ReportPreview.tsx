@@ -4,6 +4,7 @@ import { X, Download, FileText } from 'lucide-react';
 import { InvestigationData } from '@/hooks/useInvestigationData';
 import { ReportContent } from './ReportContent';
 import html2pdf from 'html2pdf.js';
+import { useToast } from '@/components/ui/use-toast'; // Import useToast
 
 interface ReportPreviewProps {
   data: InvestigationData;
@@ -20,9 +21,16 @@ interface ReportPreviewProps {
 
 export const ReportPreview = ({ data, agencyProfile, onClose }: ReportPreviewProps) => {
   const reportRef = useRef<HTMLDivElement>(null);
+  const { toast } = useToast(); // Initialize useToast
 
   const handleExportPDF = async () => {
     if (reportRef.current) {
+      toast({
+        title: "Esportazione PDF",
+        description: "Preparazione del report per l'esportazione...",
+        duration: 3000,
+      });
+
       // Wait for all images within the preview to load before exporting
       const images = reportRef.current.querySelectorAll('img');
       const imageLoadPromises = Array.from(images).map(img => {
@@ -34,7 +42,27 @@ export const ReportPreview = ({ data, agencyProfile, onClose }: ReportPreviewPro
       });
       await Promise.all(imageLoadPromises);
 
-      html2pdf().from(reportRef.current).save('Relazione_Investigativa_Anteprima.pdf');
+      // Add a small additional delay to ensure all rendering is complete
+      await new Promise(resolve => setTimeout(resolve, 1000)); // Increased additional delay
+
+      try {
+        await html2pdf().set({ 
+          html2canvas: { useCORS: true, scale: 2 }, // Added useCORS and increased scale for better quality
+          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        }).from(reportRef.current).save('Relazione_Investigativa_Anteprima.pdf');
+
+        toast({
+          title: "Successo",
+          description: "Report PDF esportato con successo!",
+        });
+      } catch (error) {
+        console.error('Error exporting PDF:', error);
+        toast({
+          title: "Errore",
+          description: "Impossibile esportare il report PDF.",
+          variant: "destructive",
+        });
+      }
     }
   };
 
