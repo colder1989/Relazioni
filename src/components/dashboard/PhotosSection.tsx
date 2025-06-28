@@ -5,9 +5,10 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { ChevronDown, Camera, Upload, Trash2, Image, Loader2 } from 'lucide-react';
+import { ChevronDown, Camera, Upload, Trash2, Image } from 'lucide-react';
 import { Photo } from '@/hooks/useInvestigationData';
 import { useToast } from '@/components/ui/use-toast';
+import { supabase } from '@/integrations/supabase/client'; // Import supabase
 
 interface PhotosSectionProps {
   data: Photo[];
@@ -16,7 +17,6 @@ interface PhotosSectionProps {
 
 export const PhotosSection = ({ data, onUpdate }: PhotosSectionProps) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [uploadingPhotoId, setUploadingPhotoId] = useState<string | null>(null);
   const { toast } = useToast();
 
   const addPhoto = () => {
@@ -26,12 +26,14 @@ export const PhotosSection = ({ data, onUpdate }: PhotosSectionProps) => {
       time: '',
       location: '',
       date: '',
-      url: '', // Will store Base64 string
+      url: '', // Will store Supabase public URL
     };
     onUpdate([...data, newPhoto]);
   };
 
   const removePhoto = (id: string) => {
+    // TODO: If photo was uploaded to Supabase, consider deleting it from storage here.
+    // For now, just remove from local state.
     onUpdate(data.filter(photo => photo.id !== id));
   };
 
@@ -43,42 +45,46 @@ export const PhotosSection = ({ data, onUpdate }: PhotosSectionProps) => {
 
   const handleFileChange = async (photoId: string, event: React.ChangeEvent<HTMLInputElement>) => {
     try {
-      setUploadingPhotoId(photoId);
       if (!event.target.files || event.target.files.length === 0) {
         throw new Error('Devi selezionare un\'immagine da caricare.');
       }
 
       const file = event.target.files[0];
-      
-      // Convert file to Base64 Data URL
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onloadend = () => {
-        updatePhoto(photoId, 'url', reader.result as string); // Store Base64 string
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${photoId}-${Math.random()}.${fileExt}`; // Use photoId for uniqueness
+      const filePath = `report-photos/${fileName}`; // Path within the bucket
+
+      // Upload to Supabase Storage
+      const { error: uploadError } = await supabase.storage
+        .from('report-photos') // Use the new bucket
+        .upload(filePath, file);
+
+      if (uploadError) {
+        throw uploadError;
+      }
+
+      // Get public URL
+      const { data: publicUrlData } = supabase.storage
+        .from('report-photos')
+        .getPublicUrl(filePath);
+
+      if (publicUrlData) {
+        updatePhoto(photoId, 'url', publicUrlData.publicUrl);
         toast({
           title: "Successo",
-          description: "Foto caricata localmente per l'anteprima.",
+          description: "Foto caricata su Supabase Storage.",
         });
-        setUploadingPhotoId(null);
-      };
-      reader.onerror = (error) => {
-        console.error('Error converting file to Base64:', error);
-        toast({
-          title: "Errore",
-          description: "Impossibile caricare la foto localmente.",
-          variant: "destructive",
-        });
-        setUploadingPhotoId(null);
-      };
+      } else {
+        throw new Error('Impossibile ottenere l\'URL pubblico della foto.');
+      }
 
-    } catch (error) {
-      console.error('Error processing photo:', error);
+    } catch (error: any) {
+      console.error('Error uploading photo:', error.message);
       toast({
         title: "Errore",
-        description: "Impossibile caricare la foto localmente.",
+        description: `Impossibile caricare la foto: ${error.message}`,
         variant: "destructive",
       });
-      setUploadingPhotoId(null);
     }
   };
 
@@ -134,7 +140,6 @@ export const PhotosSection = ({ data, onUpdate }: PhotosSectionProps) => {
                     size="sm"
                     onClick={() => removePhoto(photo.id)}
                     className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                    disabled={uploadingPhotoId === photo.id}
                   >
                     <Trash2 className="w-4 h-4" />
                   </Button>
@@ -149,14 +154,7 @@ export const PhotosSection = ({ data, onUpdate }: PhotosSectionProps) => {
                         accept="image/*"
                         onChange={(e) => handleFileChange(photo.id, e)}
                         className="professional-input"
-                        disabled={uploadingPhotoId === photo.id}
                       />
-                      {uploadingPhotoId === photo.id && (
-                        <div className="flex items-center text-sm text-blue-500 mt-2">
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Caricamento...
-                        </div>
-                      )}
                     </div>
 
                     {photo.url && (
