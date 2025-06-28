@@ -1,6 +1,6 @@
 import React from 'react';
 import { InvestigationData, Photo } from '@/hooks/useInvestigationData';
-import { cn, getProxyImageUrl } from '@/lib/utils'; // Rimosso imageUrlToBase64
+import { cn, getProxyImageUrl } from '@/lib/utils';
 
 interface ReportContentProps {
   data: InvestigationData;
@@ -46,7 +46,7 @@ export const ReportContent = ({ data, agencyProfile, className }: ReportContentP
   const FALLBACK_LOGO_BASE64 = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJsdWNpZGUgbHVjaWRlLXnoaWVsZCI+PHBhdGggZD0iTTEyIDIyczgtNCA4LTEwVjVsLTgtMy04IDN2N2MwIDYgOCAxMCA4IDEweiIvPjwvc3ZnPg==";
 
   return (
-    <div className={cn("p-8 font-inter text-sm leading-relaxed bg-falco-cream text-steel-900", className)}> {/* Apply base styles and className */}
+    <div className={cn("p-8 font-inter text-sm leading-relaxed bg-falco-cream text-steel-900", className)}>
       <div className="space-y-8 max-w-3xl mx-auto">
         {/* Header with Logo and Date */}
         <div className="flex justify-between items-start mb-8">
@@ -55,14 +55,14 @@ export const ReportContent = ({ data, agencyProfile, className }: ReportContentP
               src={getProxyImageUrl(agencyProfile.agency_logo_url)} 
               alt={agencyProfile.agency_name || "Agency Logo"} 
               className="h-24 w-auto object-contain"
-              crossOrigin="anonymous" // Aggiunto per html2canvas
+              crossOrigin="anonymous"
             />
           ) : (
             <img 
               src={FALLBACK_LOGO_BASE64} 
               alt="Falco Investigation Logo" 
               className="h-24 w-auto"
-              crossOrigin="anonymous" // Aggiunto per html2canvas
+              crossOrigin="anonymous"
             />
           )}
           <div className="text-right text-xs text-steel-700">
@@ -200,8 +200,8 @@ export const ReportContent = ({ data, agencyProfile, className }: ReportContentP
                             <img 
                               src={getProxyImageUrl(photo.url)} 
                               alt={photo.description} 
-                              className="w-full h-48 object-cover mb-2 rounded" 
-                              crossOrigin="anonymous" // Aggiunto per html2canvas
+                              className="w-full h-48 object-contain mb-2 rounded" // Changed object-cover to object-contain
+                              crossOrigin="anonymous"
                             />
                             <p className="text-xs text-steel-700">{photo.time} - {photo.location}</p>
                             <p className="text-xs text-steel-800 mt-1">{photo.description}</p>
@@ -230,8 +230,8 @@ export const ReportContent = ({ data, agencyProfile, className }: ReportContentP
                     <img 
                       src={getProxyImageUrl(photo.url)} 
                       alt={photo.description} 
-                      className="w-full h-48 object-cover mb-2 rounded" 
-                      crossOrigin="anonymous" // Aggiunto per html2canvas
+                      className="w-full h-48 object-contain mb-2 rounded" // Changed object-cover to object-contain
+                      crossOrigin="anonymous"
                     />
                     <p className="text-xs text-steel-700">{photo.time} - {photo.location}</p>
                     <p className="text-xs text-steel-800 mt-1">{photo.description}</p>
