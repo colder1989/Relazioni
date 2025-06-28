@@ -42,6 +42,9 @@ export const ReportContent = ({ data, agencyProfile, className }: ReportContentP
     return data.photos.filter(photo => photo.date === dayDate);
   };
 
+  // IMPORTANT: Replace this with the actual public URL of your fallback logo uploaded to Supabase Storage
+  const FALLBACK_LOGO_URL = "https://pdufmdtcuwbedrkzoeko.supabase.co/storage/v1/object/public/app-assets/falco-logo-fallback.png";
+
   return (
     <div className={cn("p-8 font-inter text-sm leading-relaxed bg-falco-cream text-steel-900", className)}> {/* Apply base styles and className */}
       <div className="space-y-8 max-w-3xl mx-auto">
@@ -58,7 +61,7 @@ export const ReportContent = ({ data, agencyProfile, className }: ReportContentP
             </>
           ) : (
             <img 
-              src="/lovable-uploads/ea7672d3-5fe4-45e8-bd81-ca1377c8caa8.png" 
+              src={FALLBACK_LOGO_URL} // Use the Supabase public URL for fallback
               alt="Falco Investigation Logo" 
               className="h-24 w-auto"
             />
