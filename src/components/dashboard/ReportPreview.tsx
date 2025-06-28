@@ -21,6 +21,12 @@ interface ReportPreviewProps {
 export const ReportPreview = ({ data, agencyProfile, onClose }: ReportPreviewProps) => {
   const reportRef = useRef<HTMLDivElement>(null);
 
+  const handleExportPDF = () => {
+    if (reportRef.current) {
+      html2pdf().from(reportRef.current).save('Relazione_Investigativa_Anteprima.pdf');
+    }
+  };
+
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
       <div className="bg-falco-cream text-steel-900 rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
@@ -32,6 +38,15 @@ export const ReportPreview = ({ data, agencyProfile, onClose }: ReportPreviewPro
             <h2 className="text-xl font-bold text-steel-900">Anteprima Report Investigativo</h2>
           </div>
           <div className="flex items-center space-x-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleExportPDF}
+              className="floating-button flex items-center space-x-2"
+            >
+              <Download className="w-4 h-4" />
+              <span>Esporta PDF</span>
+            </Button>
             <Button variant="outline" size="sm" onClick={onClose} className="text-steel-700 hover:text-steel-900">
               <X className="w-4 h-4" />
             </Button>

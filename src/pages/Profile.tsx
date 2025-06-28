@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Upload, User, Building, Phone, Mail, Globe, Image as ImageIcon } from 'lucide-react';
+import { Upload, User, Building, Phone, Mail, Globe, Image as ImageIcon, LogOut } from 'lucide-react'; // Import LogOut
 import { useToast } from '@/components/ui/use-toast';
 
 interface ProfileData {
@@ -136,6 +136,21 @@ const Profile: React.FC = () => {
       });
     } finally {
       setUploading(false);
+    }
+  };
+
+  const handleSignOut = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      // The SessionContextProvider will handle the redirect to /login
+    } catch (error) {
+      console.error('Error signing out:', error);
+      toast({
+        title: "Errore",
+        description: "Impossibile effettuare il logout.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -294,6 +309,16 @@ const Profile: React.FC = () => {
             </div>
           </CardContent>
         </Card>
+
+        <div className="mt-8 text-center">
+          <Button
+            onClick={handleSignOut}
+            className="falco-gradient text-white hover:opacity-90 flex items-center space-x-2 mx-auto"
+          >
+            <LogOut className="w-4 h-4" />
+            <span>Esci dal tuo account</span>
+          </Button>
+        </div>
       </div>
     </div>
   );

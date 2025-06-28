@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { FileText, Download, Eye, Plus, CheckCircle, Clock, AlertCircle, Shield, Search } from 'lucide-react';
+import { FileText, Download, Eye, Plus, CheckCircle, Clock, AlertCircle, Shield, Search, LogOut, UserCircle } from 'lucide-react';
 import { ClientInfoSection } from './dashboard/ClientInfoSection';
 import { InvestigatedInfoSection } from './dashboard/InvestigatedInfoSection';
 import { MandateDetailsSection } from './dashboard/MandateDetailsSection';
@@ -19,6 +19,7 @@ import { useInvestigationData } from '@/hooks/useInvestigationData';
 import { useSession } from '@/components/SessionContextProvider'; // Import useSession
 import { supabase } from '@/integrations/supabase/client'; // Import supabase client
 import html2pdf from 'html2pdf.js';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
 
 interface AgencyProfile {
   first_name: string;
@@ -37,6 +38,7 @@ export const InvestigationDashboard = () => {
   const [agencyProfile, setAgencyProfile] = useState<AgencyProfile | null>(null);
   const { data, updateData, resetData } = useInvestigationData();
   const { session, isLoading: isSessionLoading } = useSession();
+  const navigate = useNavigate(); // Initialize useNavigate
 
   useEffect(() => {
     setIsLoaded(true);
@@ -83,6 +85,17 @@ export const InvestigationDashboard = () => {
       root.unmount();
       document.body.removeChild(tempDiv);
     });
+  };
+
+  const handleSignOut = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      // The SessionContextProvider will handle the redirect to /login
+    } catch (error) {
+      console.error('Error signing out:', error);
+      // Optionally show a toast error
+    }
   };
 
   const getCompletionStats = () => {
@@ -159,6 +172,22 @@ export const InvestigationDashboard = () => {
                 <Download className="w-4 h-4" />
                 <span>Esporta PDF</span>
               </Button>
+              <Button
+                variant="outline"
+                onClick={() => navigate('/profile')}
+                className="floating-button flex items-center space-x-2"
+              >
+                <UserCircle className="w-4 h-4" />
+                <span>Profilo</span>
+              </Button>
+              <Button
+                variant="outline"
+                onClick={handleSignOut}
+                className="floating-button flex items-center space-x-2"
+              >
+                <LogOut className="w-4 h-4" />
+                <span>Esci</span>
+              </Button>
             </div>
           </div>
         </div>
@@ -167,7 +196,7 @@ export const InvestigationDashboard = () => {
       <div className="max-w-7xl mx-auto px-6 py-8">
         {showPreview ? (
           <div className="fade-in">
-            <ReportPreview data={data} onClose={() => setShowPreview(false)} />
+            <ReportPreview data={data} agencyProfile={agencyProfile} onClose={() => setShowPreview(false)} />
           </div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
