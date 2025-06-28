@@ -4,8 +4,8 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0';
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS', // Aggiunto
-  'Access-Control-Expose-Headers': 'Content-Length, Content-Type, ETag', // Aggiunto
+  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+  'Access-Control-Expose-Headers': 'Content-Length, Content-Type, ETag',
 };
 
 serve(async (req) => {
@@ -29,15 +29,21 @@ serve(async (req) => {
       });
     }
 
+    // --- IMPORTANT: Logging the secret value for debugging ---
     const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    console.log(`Edge Function: SUPABASE_SERVICE_ROLE_KEY status: ${serviceRoleKey ? 'FOUND' : 'NOT FOUND'}`);
+    if (serviceRoleKey) {
+      console.log(`Edge Function: SUPABASE_SERVICE_ROLE_KEY (first 10 chars): ${serviceRoleKey.substring(0, 10)}...`);
+    }
+    // --- End of logging ---
+
     if (!serviceRoleKey) {
-      console.error('Edge Function: SUPABASE_SERVICE_ROLE_KEY not found in environment');
-      return new Response(JSON.stringify({ error: 'SUPABASE_SERVICE_ROLE_KEY not found in environment' }), {
+      console.error('Edge Function: SUPABASE_SERVICE_ROLE_KEY not found in environment. Cannot access private buckets.');
+      return new Response(JSON.stringify({ error: 'SUPABASE_SERVICE_ROLE_KEY not found in environment. Ensure it is set as a secret for this Edge Function.' }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
-    console.log('Edge Function: Supabase client created with service role key.');
 
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
@@ -61,7 +67,7 @@ serve(async (req) => {
       });
     }
     const bucketName = urlParts[1].split('/')[0];
-    const filePath = urlParts[1].substring(bucketName.length + 1); // Correctly get path after bucket name
+    const filePath = urlParts[1].substring(bucketName.length + 1);
     console.log(`Edge Function: Extracted bucketName: ${bucketName}, filePath: ${filePath}`);
 
     const { data: blob, error: downloadError } = await supabase.storage
