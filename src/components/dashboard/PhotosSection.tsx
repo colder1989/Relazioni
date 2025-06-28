@@ -7,7 +7,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { ChevronDown, Camera, Upload, Trash2, Image, Loader2 } from 'lucide-react';
 import { Photo } from '@/hooks/useInvestigationData';
-// import { supabase } from '@/integrations/supabase/client'; // No longer needed for photo upload
 import { useToast } from '@/components/ui/use-toast';
 
 interface PhotosSectionProps {
@@ -27,16 +26,12 @@ export const PhotosSection = ({ data, onUpdate }: PhotosSectionProps) => {
       time: '',
       location: '',
       date: '',
-      url: '', // Initialize url for new photo
+      url: '', // Will store Base64 string
     };
     onUpdate([...data, newPhoto]);
   };
 
-  const removePhoto = (id: string, url?: string) => {
-    // Revoke the Blob URL to free up memory if it exists
-    if (url && url.startsWith('blob:')) {
-      URL.revokeObjectURL(url);
-    }
+  const removePhoto = (id: string) => {
     onUpdate(data.filter(photo => photo.id !== id));
   };
 
@@ -55,14 +50,27 @@ export const PhotosSection = ({ data, onUpdate }: PhotosSectionProps) => {
 
       const file = event.target.files[0];
       
-      // Create a local URL for the image (Blob URL)
-      const localUrl = URL.createObjectURL(file);
+      // Convert file to Base64 Data URL
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onloadend = () => {
+        updatePhoto(photoId, 'url', reader.result as string); // Store Base64 string
+        toast({
+          title: "Successo",
+          description: "Foto caricata localmente per l'anteprima.",
+        });
+        setUploadingPhotoId(null);
+      };
+      reader.onerror = (error) => {
+        console.error('Error converting file to Base64:', error);
+        toast({
+          title: "Errore",
+          description: "Impossibile caricare la foto localmente.",
+          variant: "destructive",
+        });
+        setUploadingPhotoId(null);
+      };
 
-      updatePhoto(photoId, 'url', localUrl);
-      toast({
-        title: "Successo",
-        description: "Foto caricata localmente per l'anteprima.",
-      });
     } catch (error) {
       console.error('Error processing photo:', error);
       toast({
@@ -70,7 +78,6 @@ export const PhotosSection = ({ data, onUpdate }: PhotosSectionProps) => {
         description: "Impossibile caricare la foto localmente.",
         variant: "destructive",
       });
-    } finally {
       setUploadingPhotoId(null);
     }
   };
@@ -125,7 +132,7 @@ export const PhotosSection = ({ data, onUpdate }: PhotosSectionProps) => {
                     type="button"
                     variant="outline"
                     size="sm"
-                    onClick={() => removePhoto(photo.id, photo.url)}
+                    onClick={() => removePhoto(photo.id)}
                     className="text-red-600 hover:text-red-700 hover:bg-red-50"
                     disabled={uploadingPhotoId === photo.id}
                   >

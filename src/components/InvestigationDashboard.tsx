@@ -79,7 +79,19 @@ export const InvestigationDashboard = () => {
     const root = ReactDOM.createRoot(tempDiv);
     root.render(<ReportContent data={data} agencyProfile={agencyProfile} />);
 
-    await new Promise(resolve => setTimeout(resolve, 500));
+    // Give React time to render the content into the temporary div
+    await new Promise(resolve => setTimeout(resolve, 1000)); 
+
+    // Wait for all images within the temporary div to load
+    const images = tempDiv.querySelectorAll('img');
+    const imageLoadPromises = Array.from(images).map(img => {
+      if (img.complete) return Promise.resolve();
+      return new Promise(resolve => {
+        img.onload = resolve;
+        img.onerror = resolve; // Resolve even on error to not block PDF generation
+      });
+    });
+    await Promise.all(imageLoadPromises);
 
     html2pdf().from(tempDiv).save('Relazione_Investigativa.pdf').then(() => {
       root.unmount();

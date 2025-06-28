@@ -21,8 +21,19 @@ interface ReportPreviewProps {
 export const ReportPreview = ({ data, agencyProfile, onClose }: ReportPreviewProps) => {
   const reportRef = useRef<HTMLDivElement>(null);
 
-  const handleExportPDF = () => {
+  const handleExportPDF = async () => {
     if (reportRef.current) {
+      // Wait for all images within the preview to load before exporting
+      const images = reportRef.current.querySelectorAll('img');
+      const imageLoadPromises = Array.from(images).map(img => {
+        if (img.complete) return Promise.resolve();
+        return new Promise(resolve => {
+          img.onload = resolve;
+          img.onerror = resolve; // Resolve even on error to not block
+        });
+      });
+      await Promise.all(imageLoadPromises);
+
       html2pdf().from(reportRef.current).save('Relazione_Investigativa_Anteprima.pdf');
     }
   };
