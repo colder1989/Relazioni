@@ -5,8 +5,10 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { ChevronDown, Camera, Upload, Trash2, Image } from 'lucide-react';
+import { ChevronDown, Camera, Upload, Trash2, Image, Loader2 } from 'lucide-react';
 import { Photo } from '@/hooks/useInvestigationData';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/components/ui/use-toast';
 
 interface PhotosSectionProps {
   data: Photo[];
@@ -15,20 +17,46 @@ interface PhotosSectionProps {
 
 export const PhotosSection = ({ data, onUpdate }: PhotosSectionProps) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [uploadingPhotoId, setUploadingPhotoId] = useState<string | null>(null);
+  const { toast } = useToast();
 
   const addPhoto = () => {
     const newPhoto: Photo = {
       id: Date.now().toString(),
-      file: null,
       description: '',
       time: '',
       location: '',
-      date: '', // Initialize date for new photo
+      date: '',
+      url: '', // Initialize url for new photo
     };
     onUpdate([...data, newPhoto]);
   };
 
-  const removePhoto = (id: string) => {
+  const removePhoto = async (id: string, url?: string) => {
+    // If there's a URL, try to delete the file from Supabase Storage
+    if (url) {
+      try {
+        const fileName = url.split('/').pop(); // Extract file name from URL
+        if (fileName) {
+          const { error } = await supabase.storage.from('agency-logos').remove([`public/${fileName}`]);
+          if (error) {
+            console.error('Error deleting file from storage:', error);
+            toast({
+              title: "Errore",
+              description: "Impossibile eliminare la foto dallo storage.",
+              variant: "destructive",
+            });
+          } else {
+            toast({
+              title: "Successo",
+              description: "Foto eliminata dallo storage.",
+            });
+          }
+        }
+      } catch (error) {
+        console.error('Error during storage deletion:', error);
+      }
+    }
     onUpdate(data.filter(photo => photo.id !== id));
   };
 
@@ -38,11 +66,46 @@ export const PhotosSection = ({ data, onUpdate }: PhotosSectionProps) => {
     ));
   };
 
-  const handleFileChange = (id: string, file: File | null) => {
-    if (file) {
-      const url = URL.createObjectURL(file);
-      updatePhoto(id, 'file', file);
-      updatePhoto(id, 'url', url);
+  const handleFileChange = async (photoId: string, event: React.ChangeEvent<HTMLInputElement>) => {
+    try {
+      setUploadingPhotoId(photoId);
+      if (!event.target.files || event.target.files.length === 0) {
+        throw new Error('Devi selezionare un\'immagine da caricare.');
+      }
+
+      const file = event.target.files[0];
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${photoId}-${Math.random()}.${fileExt}`; // Use photoId for unique naming
+      const filePath = `public/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('agency-logos')
+        .upload(filePath, file);
+
+      if (uploadError) {
+        throw uploadError;
+      }
+
+      const { data: publicUrlData } = supabase.storage
+        .from('agency-logos')
+        .getPublicUrl(filePath);
+
+      if (publicUrlData) {
+        updatePhoto(photoId, 'url', publicUrlData.publicUrl);
+        toast({
+          title: "Successo",
+          description: "Foto caricata con successo!",
+        });
+      }
+    } catch (error) {
+      console.error('Error uploading photo:', error);
+      toast({
+        title: "Errore",
+        description: "Impossibile caricare la foto.",
+        variant: "destructive",
+      });
+    } finally {
+      setUploadingPhotoId(null);
     }
   };
 
@@ -96,8 +159,9 @@ export const PhotosSection = ({ data, onUpdate }: PhotosSectionProps) => {
                     type="button"
                     variant="outline"
                     size="sm"
-                    onClick={() => removePhoto(photo.id)}
+                    onClick={() => removePhoto(photo.id, photo.url)}
                     className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                    disabled={uploadingPhotoId === photo.id}
                   >
                     <Trash2 className="w-4 h-4" />
                   </Button>
@@ -110,9 +174,16 @@ export const PhotosSection = ({ data, onUpdate }: PhotosSectionProps) => {
                       <Input
                         type="file"
                         accept="image/*"
-                        onChange={(e) => handleFileChange(photo.id, e.target.files?.[0] || null)}
+                        onChange={(e) => handleFileChange(photo.id, e)}
                         className="professional-input"
+                        disabled={uploadingPhotoId === photo.id}
                       />
+                      {uploadingPhotoId === photo.id && (
+                        <div className="flex items-center text-sm text-blue-500 mt-2">
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Caricamento...
+                        </div>
+                      )}
                     </div>
 
                     {photo.url && (

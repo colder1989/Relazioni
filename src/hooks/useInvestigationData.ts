@@ -43,12 +43,12 @@ export interface ObservationDay {
 
 export interface Photo {
   id: string;
-  file: File | null;
+  // file: File | null; // Removed as we will store the URL
   description: string;
   time: string;
   location: string;
-  url?: string;
-  date: string; // Added date field for photo
+  url?: string; // This will store the public URL from Supabase
+  date: string;
 }
 
 export interface Conclusions {
