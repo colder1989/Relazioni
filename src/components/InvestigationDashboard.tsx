@@ -24,9 +24,10 @@ export const InvestigationDashboard = () => {
     setIsLoaded(true);
   }, []);
 
+  // The actual PDF export logic is now handled within ReportPreview
   const handleExportPDF = () => {
-    // PDF export logic will be implemented
-    console.log('Exporting PDF...', data);
+    // This button will now just open the preview, where the export button is
+    setShowPreview(true);
   };
 
   const getCompletionStats = () => {
@@ -97,7 +98,7 @@ export const InvestigationDashboard = () => {
                 <span>Anteprima</span>
               </Button>
               <Button
-                onClick={handleExportPDF}
+                onClick={handleExportPDF} // This will now open the preview
                 className="falco-gradient text-white hover:opacity-90 flex items-center space-x-2 floating-button"
               >
                 <Download className="w-4 h-4" />
@@ -151,8 +152,6 @@ export const InvestigationDashboard = () => {
                   onUpdate={(observationDays) => updateData({ observationDays })} 
                 />
               </div>
-              
-              {/* Removed GamblingActivitiesSection */}
               
               <div className="stagger-item">
                 <PhotosSection 
@@ -230,7 +229,6 @@ export const InvestigationDashboard = () => {
                       "Specifica dettagli del mandato",
                       "Configura gestione foto",
                       "Aggiungi giorni di osservazione",
-                      // Removed "Documenta attività di gioco (se rilevanti)",
                       "Carica foto e documenti",
                       "Aggiungi note extra se necessario",
                       "Scrivi le conclusioni",
@@ -268,7 +266,6 @@ export const InvestigationDashboard = () => {
                   </div>
                   
                   <div className="grid grid-cols-2 gap-4">
-                    {/* Removed Gambling Activities Stat */}
                     <div className="text-center p-4 professional-accent rounded-lg">
                       <div className="text-2xl font-bold text-purple-400">{data.investigatedInfo.vehicles.length}</div>
                       <div className="text-xs text-slate-300">Veicoli Monitorati</div>
