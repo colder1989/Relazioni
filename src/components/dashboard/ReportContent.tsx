@@ -42,9 +42,8 @@ export const ReportContent = ({ data, agencyProfile, className }: ReportContentP
     return data.photos.filter(photo => photo.date === dayDate);
   };
 
-  // IMPORTANT: Carica il tuo logo di fallback (es. 'falco-logo-fallback.png') nel bucket 'report-photos' di Supabase
-  // e sostituisci questo URL con quello pubblico che Supabase ti fornirà.
-  const FALLBACK_LOGO_URL = "https://pdufmdtcuwbedrkzoeko.supabase.co/storage/v1/object/public/report-photos/falco-logo-fallback.png";
+  // Logo di fallback incorporato come stringa Base64 (un'icona di scudo semplice)
+  const FALLBACK_LOGO_BASE64 = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJsdWNpZGUgbHVjaWRlLXNoaWVsZCI+PHBhdGggZD0iTTEyIDIyczgtNCA4LTEwVjVsLTgtMy04IDN2N2MwIDYgOCAxMCA4IDEweiIvPjwvc3ZnPg==";
 
   return (
     <div className={cn("p-8 font-inter text-sm leading-relaxed bg-falco-cream text-steel-900", className)}> {/* Apply base styles and className */}
@@ -53,7 +52,7 @@ export const ReportContent = ({ data, agencyProfile, className }: ReportContentP
         <div className="flex justify-between items-start mb-8">
           {agencyProfile?.agency_logo_url ? (
             <>
-              {console.log('ReportContent: Agency Logo URL:', agencyProfile.agency_logo_url)}
+              {console.log('ReportContent: Using Agency Logo URL:', agencyProfile.agency_logo_url)}
               <img 
                 src={agencyProfile.agency_logo_url} 
                 alt={agencyProfile.agency_name || "Agency Logo"} 
@@ -61,11 +60,14 @@ export const ReportContent = ({ data, agencyProfile, className }: ReportContentP
               />
             </>
           ) : (
-            <img 
-              src={FALLBACK_LOGO_URL} // Usa l'URL pubblico di Supabase per il fallback
-              alt="Falco Investigation Logo" 
-              className="h-24 w-auto"
-            />
+            <>
+              {console.log('ReportContent: Using FALLBACK_LOGO_BASE64.')}
+              <img 
+                src={FALLBACK_LOGO_BASE64} // Usa l'URL Base64 per il fallback
+                alt="Falco Investigation Logo" 
+                className="h-24 w-auto"
+              />
+            </>
           )}
           <div className="text-right text-xs text-steel-700">
             <p className="font-bold">{agencyProfile?.agency_name || "FALCO INVESTIGATION"}</p>

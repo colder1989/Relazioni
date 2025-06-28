@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Upload, User, Building, Phone, Mail, Globe, Image as ImageIcon, LogOut } from 'lucide-react'; // Import LogOut
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } => '@/components/ui/use-toast';
 
 interface ProfileData {
   first_name: string;
@@ -45,11 +45,25 @@ const Profile: React.FC = () => {
         .single();
 
       if (error && status !== 406) {
+        console.error('Error fetching profile in getProfile:', error); // Log di errore
         throw error;
       }
 
       if (data) {
+        console.log('Fetched profile data:', data); // Log dei dati recuperati
         setProfile(data);
+      } else {
+        console.log('No profile data found for user, initializing with empty.');
+        setProfile({
+          first_name: '',
+          last_name: '',
+          agency_name: '',
+          agency_address: '',
+          agency_phone: '',
+          agency_email: '',
+          agency_website: '',
+          agency_logo_url: '',
+        });
       }
     } catch (error) {
       console.error('Error loading user profile:', error);
@@ -77,6 +91,7 @@ const Profile: React.FC = () => {
       const { error } = await supabase.from('profiles').upsert(updates);
 
       if (error) {
+        console.error('Error updating profile in DB:', error); // Log di errore
         throw error;
       }
 
@@ -108,11 +123,13 @@ const Profile: React.FC = () => {
       const fileName = `${session!.user.id}-${Math.random()}.${fileExt}`;
       const filePath = `public/${fileName}`;
 
+      console.log('Attempting to upload file:', fileName, 'to path:', filePath); // Log di caricamento
       const { error: uploadError } = await supabase.storage
         .from('agency-logos')
         .upload(filePath, file);
 
       if (uploadError) {
+        console.error('Supabase Storage upload error:', uploadError); // Log di errore storage
         throw uploadError;
       }
 
@@ -121,17 +138,32 @@ const Profile: React.FC = () => {
         .getPublicUrl(filePath);
 
       if (publicUrlData) {
+        console.log('Public URL obtained:', publicUrlData.publicUrl); // Log URL pubblico
+        // Update local state
         setProfile(prev => ({ ...prev!, agency_logo_url: publicUrlData.publicUrl }));
+        
+        // Immediately save to database
+        console.log('Attempting to save logo URL to profile in DB:', publicUrlData.publicUrl); // Log salvataggio DB
+        const { error: updateDbError } = await supabase
+          .from('profiles')
+          .update({ agency_logo_url: publicUrlData.publicUrl })
+          .eq('id', session!.user.id);
+
+        if (updateDbError) {
+          console.error('Error saving logo URL to profile in DB:', updateDbError); // Log di errore DB
+          throw updateDbError;
+        }
+
         toast({
           title: "Successo",
-          description: "Logo caricato con successo!",
+          description: "Logo caricato e salvato con successo!",
         });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error uploading logo:', error);
       toast({
         title: "Errore",
-        description: "Impossibile caricare il logo.",
+        description: `Impossibile caricare il logo: ${error.message || error.toString()}`,
         variant: "destructive",
       });
     } finally {
@@ -302,7 +334,6 @@ const Profile: React.FC = () => {
                   disabled={uploading}
                   className="professional-input"
                 />
-                {/* Rimosso onClick dal pulsante. L'upload avviene su onChange dell'input file. */}
                 <Button type="button" disabled={uploading} className="falco-gradient">
                   {uploading ? 'Caricamento...' : 'Carica Logo'}
                 </Button>
