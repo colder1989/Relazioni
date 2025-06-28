@@ -1,14 +1,13 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, Outlet } from 'react-router-dom'; // Importa Outlet
 import { supabase } from '@/integrations/supabase/client';
 import { useSession } from '@/components/SessionContextProvider';
 import { useToast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';
-// Importazioni rimosse per semplificazione: Avatar, DropdownMenu
 import { LogOut, LayoutDashboard, UserCircle, Shield } from 'lucide-react';
 
 interface MainLayoutProps {
-  children: React.ReactNode;
+  children?: React.ReactNode; // children non è più strettamente necessario per Outlet, ma lo lascio per compatibilità
 }
 
 export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
@@ -39,13 +38,11 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
               <UserCircle className="w-4 h-4" />
               <span>Profilo</span>
             </Link>
-            {/* Per questa fase di debug, il pulsante di login/logout è rimosso dal layout principale */}
-            {/* Sarà gestito dalle singole pagine o reintrodotto in seguito */}
           </nav>
         </div>
       </header>
       <main className="flex-grow">
-        {children}
+        <Outlet /> {/* Qui viene renderizzato il contenuto delle rotte annidate */}
       </main>
     </div>
   );
