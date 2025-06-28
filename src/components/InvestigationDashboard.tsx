@@ -16,16 +16,53 @@ import { PrivacySection } from './dashboard/PrivacySection';
 import { ReportPreview } from './dashboard/ReportPreview';
 import { ReportContent } from './dashboard/ReportContent';
 import { useInvestigationData } from '@/hooks/useInvestigationData';
+import { useSession } from '@/components/SessionContextProvider'; // Import useSession
+import { supabase } from '@/integrations/supabase/client'; // Import supabase client
 import html2pdf from 'html2pdf.js';
+
+interface AgencyProfile {
+  first_name: string;
+  last_name: string;
+  agency_name: string;
+  agency_address: string;
+  agency_phone: string;
+  agency_email: string;
+  agency_website: string;
+  agency_logo_url: string;
+}
 
 export const InvestigationDashboard = () => {
   const [showPreview, setShowPreview] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [agencyProfile, setAgencyProfile] = useState<AgencyProfile | null>(null);
   const { data, updateData, resetData } = useInvestigationData();
+  const { session, isLoading: isSessionLoading } = useSession();
 
   useEffect(() => {
     setIsLoaded(true);
   }, []);
+
+  useEffect(() => {
+    const fetchAgencyProfile = async () => {
+      if (session?.user) {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('first_name, last_name, agency_name, agency_address, agency_phone, agency_email, agency_website, agency_logo_url')
+          .eq('id', session.user.id)
+          .single();
+
+        if (error) {
+          console.error('Error fetching agency profile:', error);
+        } else if (data) {
+          setAgencyProfile(data);
+        }
+      }
+    };
+
+    if (!isSessionLoading) {
+      fetchAgencyProfile();
+    }
+  }, [session, isSessionLoading]);
 
   const handleDirectExportPDF = async () => {
     const tempDiv = document.createElement('div');
@@ -38,7 +75,7 @@ export const InvestigationDashboard = () => {
     document.body.appendChild(tempDiv);
 
     const root = ReactDOM.createRoot(tempDiv);
-    root.render(<ReportContent data={data} />);
+    root.render(<ReportContent data={data} agencyProfile={agencyProfile} />);
 
     await new Promise(resolve => setTimeout(resolve, 500));
 
@@ -91,7 +128,7 @@ export const InvestigationDashboard = () => {
                 <Shield className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-slate-100">Falco Investigation</h1>
+                <h1 className="text-2xl font-bold text-slate-100">{agencyProfile?.agency_name || "Falco Investigation"}</h1>
                 <p className="text-slate-300 flex items-center space-x-2">
                   <Search className="w-4 h-4" />
                   <span>Dashboard Relazioni Investigative</span>

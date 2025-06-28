@@ -3,9 +3,17 @@ import { InvestigationData, Photo } from '@/hooks/useInvestigationData';
 
 interface ReportContentProps {
   data: InvestigationData;
+  agencyProfile: {
+    agency_name: string;
+    agency_address: string;
+    agency_phone: string;
+    agency_email: string;
+    agency_website: string;
+    agency_logo_url: string;
+  } | null;
 }
 
-export const ReportContent = ({ data }: ReportContentProps) => {
+export const ReportContent = ({ data, agencyProfile }: ReportContentProps) => {
   const formatDate = (dateString: string) => {
     if (!dateString) return '';
     return new Date(dateString).toLocaleDateString('it-IT');
@@ -37,17 +45,25 @@ export const ReportContent = ({ data }: ReportContentProps) => {
       <div className="space-y-8 max-w-3xl mx-auto">
         {/* Header with Logo and Date */}
         <div className="flex justify-between items-start mb-8">
-          <img 
-            src="/lovable-uploads/ea7672d3-5fe4-45e8-bd81-ca137cc8caa8.png" 
-            alt="Falco Investigation Logo" 
-            className="h-24 w-auto"
-          />
+          {agencyProfile?.agency_logo_url ? (
+            <img 
+              src={agencyProfile.agency_logo_url} 
+              alt={agencyProfile.agency_name || "Agency Logo"} 
+              className="h-24 w-auto object-contain"
+            />
+          ) : (
+            <img 
+              src="/lovable-uploads/ea7672d3-5fe4-45e8-bd81-ca137cc8caa8.png" 
+              alt="Falco Investigation Logo" 
+              className="h-24 w-auto"
+            />
+          )}
           <div className="text-right text-xs text-steel-700">
-            <p className="font-bold">FALCO INVESTIGATION</p>
-            <p>20124 MILANO (MI) – VIA SABAUDIA 8</p>
-            <p>Tel +39 02 82 19 79 69 - P.Iva IT11535690967</p>
+            <p className="font-bold">{agencyProfile?.agency_name || "FALCO INVESTIGATION"}</p>
+            <p>{agencyProfile?.agency_address || "20124 MILANO (MI) – VIA SABAUDIA 8"}</p>
+            <p>Tel {agencyProfile?.agency_phone || "+39 02 82 19 79 69"} - P.Iva IT11535690967</p>
             <p>Autorizzazione Prefettura Milano Prot. 14816/12B15E Area I OSP</p>
-            <p>milano@falcoinvestigation.it - WWW.INVESTIGATIONFALCO.IT</p>
+            <p>{agencyProfile?.agency_email || "milano@falcoinvestigation.it"} - {agencyProfile?.agency_website || "WWW.INVESTIGATIONFALCO.IT"}</p>
             <p className="mt-4 text-steel-900 font-medium">Milano, {formatDateLong(today)}</p>
           </div>
         </div>
@@ -229,7 +245,7 @@ export const ReportContent = ({ data }: ReportContentProps) => {
         {/* Signature */}
         <div className="text-right mb-12 mt-12">
           <p className="font-bold text-base text-steel-900">INVESTIGATORE PRIVATO</p>
-          <p className="mt-2 text-base text-steel-900">Tripolino Alessandro</p>
+          <p className="mt-2 text-base text-steel-900">{agencyProfile?.first_name} {agencyProfile?.last_name}</p>
         </div>
 
         {/* Privacy Notice */}
