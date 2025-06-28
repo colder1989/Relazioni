@@ -45,6 +45,13 @@ export const ReportContent = ({ data, agencyProfile, className }: ReportContentP
   // Logo di fallback incorporato come stringa Base64 (un'icona di scudo semplice)
   const FALLBACK_LOGO_BASE64 = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJsdWNpZGUgbHVjaWRlLXNoaWVsZCI+PHBhdGggZD0iTTEyIDIyczgtNCA4LTEwVjVsLTgtMy04IDN2N2MwIDYgOCAxMCA4IDEweiIvPjwvc3ZnPg==";
 
+  // Funzione per ottenere l'URL proxy dell'immagine
+  const getProxyImageUrl = (originalUrl: string) => {
+    if (!originalUrl) return FALLBACK_LOGO_BASE64; // Fallback se l'URL è vuoto
+    const supabaseProjectId = "pdufmdtcuwbedrkzoeko"; // Il tuo Project ID Supabase
+    return `https://${supabaseProjectId}.supabase.co/functions/v1/image-proxy?url=${encodeURIComponent(originalUrl)}`;
+  };
+
   return (
     <div className={cn("p-8 font-inter text-sm leading-relaxed bg-falco-cream text-steel-900", className)}> {/* Apply base styles and className */}
       <div className="space-y-8 max-w-3xl mx-auto">
@@ -54,10 +61,9 @@ export const ReportContent = ({ data, agencyProfile, className }: ReportContentP
             <>
               {console.log('ReportContent: Using Agency Logo URL:', agencyProfile.agency_logo_url)}
               <img 
-                src={agencyProfile.agency_logo_url} 
+                src={getProxyImageUrl(agencyProfile.agency_logo_url)} // Usa l'URL proxy
                 alt={agencyProfile.agency_name || "Agency Logo"} 
                 className="h-24 w-auto object-contain"
-                crossOrigin="anonymous" // Aggiunto per CORS
               />
             </>
           ) : (
@@ -67,7 +73,6 @@ export const ReportContent = ({ data, agencyProfile, className }: ReportContentP
                 src={FALLBACK_LOGO_BASE64} // Usa l'URL Base64 per il fallback
                 alt="Falco Investigation Logo" 
                 className="h-24 w-auto"
-                crossOrigin="anonymous" // Aggiunto per CORS
               />
             </>
           )}
@@ -205,10 +210,9 @@ export const ReportContent = ({ data, agencyProfile, className }: ReportContentP
                         return photo.url && (
                           <div key={photo.id} className="border border-slate-300 p-2 rounded-lg bg-white">
                             <img 
-                              src={photo.url} 
+                              src={getProxyImageUrl(photo.url)} // Usa l'URL proxy
                               alt={photo.description} 
                               className="w-full h-48 object-cover mb-2 rounded" 
-                              crossOrigin="anonymous" // Aggiunto per CORS
                             />
                             <p className="text-xs text-steel-700">{photo.time} - {photo.location}</p>
                             <p className="text-xs text-steel-800 mt-1">{photo.description}</p>
@@ -236,10 +240,9 @@ export const ReportContent = ({ data, agencyProfile, className }: ReportContentP
                 return photo.url && (
                   <div key={photo.id} className="border border-slate-300 p-2 rounded-lg bg-white">
                     <img 
-                      src={photo.url} 
+                      src={getProxyImageUrl(photo.url)} // Usa l'URL proxy
                       alt={photo.description} 
                       className="w-full h-48 object-cover mb-2 rounded" 
-                      crossOrigin="anonymous" // Aggiunto per CORS
                     />
                     <p className="text-xs text-steel-700">{photo.time} - {photo.location}</p>
                     <p className="text-xs text-steel-800 mt-1">{photo.description}</p>

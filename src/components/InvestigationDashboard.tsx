@@ -15,12 +15,12 @@ import { ConclusionsSection } from './dashboard/ConclusionsSection';
 import { PrivacySection } from './dashboard/PrivacySection';
 import { ReportPreview } from './dashboard/ReportPreview';
 import { ReportContent } from './dashboard/ReportContent';
-import { useInvestigationData } from '@/hooks/useInvestigationData';
+import { useInvestigationData, Photo } from '@/hooks/useInvestigationData';
 import { useSession } from '@/components/SessionContextProvider';
 import { supabase } from '@/integrations/supabase/client';
 import html2pdf from 'html2pdf.js';
 import { useNavigate } from 'react-router-dom';
-import { useToast } from '@/components/ui/use-toast'; // Import useToast
+import { useToast } from '@/components/ui/use-toast';
 
 interface AgencyProfile {
   first_name: string;
@@ -40,7 +40,8 @@ export const InvestigationDashboard = () => {
   const { data, updateData, resetData, isLoadingReport } = useInvestigationData();
   const { session, isLoading: isSessionLoading } = useSession();
   const navigate = useNavigate();
-  const { toast } = useToast(); // Initialize useToast
+  const { toast } = useToast();
+  const [isExporting, setIsExporting] = useState(false);
 
   useEffect(() => {
     setIsLoaded(true);
@@ -72,48 +73,64 @@ export const InvestigationDashboard = () => {
     }
   }, [session, isSessionLoading]);
 
+  // Funzione per ottenere l'URL proxy dell'immagine
+  const getProxyImageUrl = (originalUrl: string) => {
+    if (!originalUrl) return ''; // Gestisci il caso di URL vuoto
+    const supabaseProjectId = "pdufmdtcuwbedrkzoeko"; // Il tuo Project ID Supabase
+    return `https://${supabaseProjectId}.supabase.co/functions/v1/image-proxy?url=${encodeURIComponent(originalUrl)}`;
+  };
+
   const handleDirectExportPDF = async () => {
+    setIsExporting(true);
     toast({
       title: "Esportazione PDF",
       description: "Preparazione del report per l'esportazione...",
       duration: 3000,
     });
 
-    const tempDiv = document.createElement('div');
-    tempDiv.style.position = 'absolute';
-    tempDiv.style.left = '-9999px';
-    tempDiv.style.top = '-9999px';
-    tempDiv.style.width = '210mm'; // A4 width
-    tempDiv.style.height = '297mm'; // A4 height
-    tempDiv.style.overflow = 'hidden';
-    document.body.appendChild(tempDiv);
-
-    // Pass the className to ReportContent to ensure Tailwind styles are applied
-    const root = ReactDOM.createRoot(tempDiv);
-    root.render(<ReportContent data={data} agencyProfile={agencyProfile} className="p-8 font-inter text-sm leading-relaxed bg-falco-cream text-steel-900" />);
-
-    // Give React time to render the content into the temporary div
-    await new Promise(resolve => setTimeout(resolve, 1500)); // Increased delay
-
-    // Wait for all images within the temporary div to load
-    const images = tempDiv.querySelectorAll('img');
-    const imageLoadPromises = Array.from(images).map(img => {
-      if (img.complete) return Promise.resolve();
-      return new Promise(resolve => {
-        img.onload = resolve;
-        img.onerror = resolve; // Resolve even on error to not block PDF generation
-      });
-    });
-    await Promise.all(imageLoadPromises);
-
-    // Add a small additional delay to ensure all rendering is complete
-    await new Promise(resolve => setTimeout(resolve, 1000)); // Increased additional delay
-
-    console.log("Content of tempDiv before PDF generation:", tempDiv.innerHTML); // Debugging log
+    let tempAgencyProfile = agencyProfile;
+    let tempPhotos: Photo[] = [];
 
     try {
+      // Pre-process agency logo URL
+      if (agencyProfile?.agency_logo_url) {
+        tempAgencyProfile = { ...agencyProfile, agency_logo_url: getProxyImageUrl(agencyProfile.agency_logo_url) };
+      }
+
+      // Pre-process report photos URLs
+      if (data.photos && data.photos.length > 0) {
+        tempPhotos = data.photos.map(photo => ({
+          ...photo,
+          url: photo.url ? getProxyImageUrl(photo.url) : ''
+        }));
+      }
+
+      const tempDiv = document.createElement('div');
+      tempDiv.style.position = 'absolute';
+      tempDiv.style.left = '-9999px';
+      tempDiv.style.top = '-9999px';
+      tempDiv.style.width = '210mm'; // A4 width
+      tempDiv.style.height = '297mm'; // A4 height
+      tempDiv.style.overflow = 'hidden';
+      document.body.appendChild(tempDiv);
+
+      // Pass the className to ReportContent to ensure Tailwind styles are applied
+      const root = ReactDOM.createRoot(tempDiv);
+      root.render(
+        <ReportContent 
+          data={{ ...data, photos: tempPhotos }} 
+          agencyProfile={tempAgencyProfile} 
+          className="p-8 font-inter text-sm leading-relaxed bg-falco-cream text-steel-900" 
+        />
+      );
+
+      // Give React time to render the content into the temporary div
+      await new Promise(resolve => setTimeout(resolve, 1500)); 
+
+      console.log("Content of tempDiv before PDF generation:", tempDiv.innerHTML); // Debugging log
+
       await html2pdf().set({ 
-        html2canvas: { useCORS: true, scale: 2 }, // Added useCORS and increased scale for better quality
+        html2canvas: { useCORS: true, scale: 2 }, 
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
       }).from(tempDiv).save('Relazione_Investigativa.pdf');
       
@@ -129,8 +146,11 @@ export const InvestigationDashboard = () => {
         variant: "destructive",
       });
     } finally {
-      root.unmount();
-      document.body.removeChild(tempDiv);
+      setIsExporting(false);
+      if (tempDiv.parentNode) {
+        root.unmount();
+        document.body.removeChild(tempDiv);
+      }
     }
   };
 
@@ -222,9 +242,14 @@ export const InvestigationDashboard = () => {
               <Button
                 onClick={handleDirectExportPDF}
                 className="falco-gradient text-white hover:opacity-90 flex items-center space-x-2 floating-button"
+                disabled={isExporting}
               >
-                <Download className="w-4 h-4" />
-                <span>Esporta PDF</span>
+                {isExporting ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <Download className="w-4 h-4" />
+                )}
+                <span>{isExporting ? 'Esportazione...' : 'Esporta PDF'}</span>
               </Button>
               <Button
                 variant="outline"

@@ -1,10 +1,10 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { X, Download, FileText } from 'lucide-react';
-import { InvestigationData } from '@/hooks/useInvestigationData';
+import { X, Download, FileText, Loader2 } from 'lucide-react';
+import { InvestigationData, Photo } from '@/hooks/useInvestigationData';
 import { ReportContent } from './ReportContent';
 import html2pdf from 'html2pdf.js';
-import { useToast } from '@/components/ui/use-toast'; // Import useToast
+import { useToast } from '@/components/ui/use-toast';
 
 interface ReportPreviewProps {
   data: InvestigationData;
@@ -21,9 +21,55 @@ interface ReportPreviewProps {
 
 export const ReportPreview = ({ data, agencyProfile, onClose }: ReportPreviewProps) => {
   const reportRef = useRef<HTMLDivElement>(null);
-  const { toast } = useToast(); // Initialize useToast
+  const { toast } = useToast();
+  const [isPreparingPreview, setIsPreparingPreview] = useState(true);
+  const [previewData, setPreviewData] = useState<InvestigationData | null>(null);
+  const [previewAgencyProfile, setPreviewAgencyProfile] = useState<typeof agencyProfile | null>(null);
+
+  // Funzione per ottenere l'URL proxy dell'immagine
+  const getProxyImageUrl = (originalUrl: string) => {
+    if (!originalUrl) return ''; // Gestisci il caso di URL vuoto
+    const supabaseProjectId = "pdufmdtcuwbedrkzoeko"; // Il tuo Project ID Supabase
+    return `https://${supabaseProjectId}.supabase.co/functions/v1/image-proxy?url=${encodeURIComponent(originalUrl)}`;
+  };
+
+  useEffect(() => {
+    const preparePreview = async () => {
+      setIsPreparingPreview(true);
+      let tempAgencyProfile = agencyProfile;
+      let tempPhotos: Photo[] = [];
+
+      // Pre-process agency logo URL
+      if (agencyProfile?.agency_logo_url) {
+        tempAgencyProfile = { ...agencyProfile, agency_logo_url: getProxyImageUrl(agencyProfile.agency_logo_url) };
+      }
+
+      // Pre-process report photos URLs
+      if (data.photos && data.photos.length > 0) {
+        tempPhotos = data.photos.map(photo => ({
+          ...photo,
+          url: photo.url ? getProxyImageUrl(photo.url) : ''
+        }));
+      }
+
+      setPreviewAgencyProfile(tempAgencyProfile);
+      setPreviewData({ ...data, photos: tempPhotos });
+      setIsPreparingPreview(false);
+    };
+
+    preparePreview();
+  }, [data, agencyProfile]);
 
   const handleExportPDF = async () => {
+    if (!previewData || !previewAgencyProfile) {
+      toast({
+        title: "Attenzione",
+        description: "L'anteprima non è ancora pronta per l'esportazione.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (reportRef.current) {
       toast({
         title: "Esportazione PDF",
@@ -84,9 +130,14 @@ export const ReportPreview = ({ data, agencyProfile, onClose }: ReportPreviewPro
               size="sm"
               onClick={handleExportPDF}
               className="floating-button flex items-center space-x-2"
+              disabled={isPreparingPreview}
             >
-              <Download className="w-4 h-4" />
-              <span>Esporta PDF</span>
+              {isPreparingPreview ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Download className="w-4 h-4" />
+              )}
+              <span>{isPreparingPreview ? 'Caricamento...' : 'Esporta PDF'}</span>
             </Button>
             <Button variant="outline" size="sm" onClick={onClose} className="text-steel-700 hover:text-steel-900">
               <X className="w-4 h-4" />
@@ -94,9 +145,18 @@ export const ReportPreview = ({ data, agencyProfile, onClose }: ReportPreviewPro
           </div>
         </div>
 
-        <div className="overflow-y-auto flex-grow" ref={reportRef}>
-          <ReportContent data={data} agencyProfile={agencyProfile} className="p-8 font-inter text-sm leading-relaxed bg-falco-cream text-steel-900" /> {/* Pass className to ReportContent */}
-        </div>
+        {isPreparingPreview ? (
+          <div className="flex-grow flex items-center justify-center text-steel-700">
+            <Loader2 className="mr-2 h-8 w-8 animate-spin" />
+            Preparazione anteprima...
+          </div>
+        ) : (
+          <div className="overflow-y-auto flex-grow" ref={reportRef}>
+            {previewData && previewAgencyProfile && (
+              <ReportContent data={previewData} agencyProfile={previewAgencyProfile} className="p-8 font-inter text-sm leading-relaxed bg-falco-cream text-steel-900" />
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
