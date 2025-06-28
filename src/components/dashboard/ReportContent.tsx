@@ -45,12 +45,17 @@ export const ReportContent = ({ data, agencyProfile, className }: ReportContentP
   // Logo di fallback incorporato come stringa Base64 (un'icona di scudo semplice)
   const FALLBACK_LOGO_BASE64 = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJsdWNpZGUgbHVjaWRlLXNoaWVsZCI+PHBhdGggZD0iTTEyIDIyczgtNCA4LTEwVjVsLTgtMy04IDN2N2MwIDYgOCAxMCA4IDEweiIvPjwvc3ZnPg==";
 
+  // Funzione per verificare se un URL è un URL di Supabase Storage
+  const isSupabaseStorageUrl = (url: string) => {
+    return url.includes('supabase.co/storage/v1/object/public/');
+  };
+
   return (
     <div className={cn("p-8 font-inter text-sm leading-relaxed bg-falco-cream text-steel-900", className)}> {/* Apply base styles and className */}
       <div className="space-y-8 max-w-3xl mx-auto">
         {/* Header with Logo and Date */}
         <div className="flex justify-between items-start mb-8">
-          {agencyProfile?.agency_logo_url ? (
+          {agencyProfile?.agency_logo_url && isSupabaseStorageUrl(agencyProfile.agency_logo_url) ? (
             <>
               {console.log('ReportContent: Using Agency Logo URL:', agencyProfile.agency_logo_url)}
               <img 
