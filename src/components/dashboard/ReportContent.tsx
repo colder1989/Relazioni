@@ -57,6 +57,7 @@ export const ReportContent = ({ data, agencyProfile, className }: ReportContentP
                 src={agencyProfile.agency_logo_url} 
                 alt={agencyProfile.agency_name || "Agency Logo"} 
                 className="h-24 w-auto object-contain"
+                crossOrigin="anonymous" // Aggiunto per CORS
               />
             </>
           ) : (
@@ -66,6 +67,7 @@ export const ReportContent = ({ data, agencyProfile, className }: ReportContentP
                 src={FALLBACK_LOGO_BASE64} // Usa l'URL Base64 per il fallback
                 alt="Falco Investigation Logo" 
                 className="h-24 w-auto"
+                crossOrigin="anonymous" // Aggiunto per CORS
               />
             </>
           )}
@@ -202,7 +204,12 @@ export const ReportContent = ({ data, agencyProfile, className }: ReportContentP
                         console.log('ReportContent: Rendering photo for day:', photo.url);
                         return photo.url && (
                           <div key={photo.id} className="border border-slate-300 p-2 rounded-lg bg-white">
-                            <img src={photo.url} alt={photo.description} className="w-full h-48 object-cover mb-2 rounded" />
+                            <img 
+                              src={photo.url} 
+                              alt={photo.description} 
+                              className="w-full h-48 object-cover mb-2 rounded" 
+                              crossOrigin="anonymous" // Aggiunto per CORS
+                            />
                             <p className="text-xs text-steel-700">{photo.time} - {photo.location}</p>
                             <p className="text-xs text-steel-800 mt-1">{photo.description}</p>
                           </div>
@@ -228,7 +235,12 @@ export const ReportContent = ({ data, agencyProfile, className }: ReportContentP
                 console.log('ReportContent: Rendering photo for separate dossier:', photo.url);
                 return photo.url && (
                   <div key={photo.id} className="border border-slate-300 p-2 rounded-lg bg-white">
-                    <img src={photo.url} alt={photo.description} className="w-full h-48 object-cover mb-2 rounded" />
+                    <img 
+                      src={photo.url} 
+                      alt={photo.description} 
+                      className="w-full h-48 object-cover mb-2 rounded" 
+                      crossOrigin="anonymous" // Aggiunto per CORS
+                    />
                     <p className="text-xs text-steel-700">{photo.time} - {photo.location}</p>
                     <p className="text-xs text-steel-800 mt-1">{photo.description}</p>
                   </div>
