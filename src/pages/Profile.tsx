@@ -298,11 +298,12 @@ const Profile: React.FC = () => {
                   id="logo_upload"
                   type="file"
                   accept="image/*"
-                  onChange={handleLogoUpload}
+                  onChange={handleLogoUpload} // La funzione viene chiamata solo qui
                   disabled={uploading}
                   className="professional-input"
                 />
-                <Button onClick={handleLogoUpload} disabled={uploading} className="falco-gradient">
+                {/* Rimosso onClick dal pulsante. L'upload avviene su onChange dell'input file. */}
+                <Button type="button" disabled={uploading} className="falco-gradient">
                   {uploading ? 'Caricamento...' : 'Carica Logo'}
                 </Button>
               </div>
