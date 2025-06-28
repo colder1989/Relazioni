@@ -187,13 +187,16 @@ export const ReportContent = ({ data, agencyProfile }: ReportContentProps) => {
                   <div className="mt-4">
                     <h5 className="font-semibold mb-2 text-sm text-steel-900">Documentazione Fotografica del Giorno:</h5>
                     <div className="grid grid-cols-2 gap-4">
-                      {getPhotosForDay(day.date).map((photo) => photo.url && (
-                        <div key={photo.id} className="border border-slate-300 p-2 rounded-lg bg-white">
-                          <img src={photo.url} alt={photo.description} className="w-full h-48 object-cover mb-2 rounded" />
-                          <p className="text-xs text-steel-700">{photo.time} - {photo.location}</p>
-                          <p className="text-xs text-steel-800 mt-1">{photo.description}</p>
-                        </div>
-                      ))}
+                      {getPhotosForDay(day.date).map((photo) => {
+                        console.log('Rendering photo for day:', photo.url); // LOGGING
+                        return photo.url && (
+                          <div key={photo.id} className="border border-slate-300 p-2 rounded-lg bg-white">
+                            <img src={photo.url} alt={photo.description} className="w-full h-48 object-cover mb-2 rounded" />
+                            <p className="text-xs text-steel-700">{photo.time} - {photo.location}</p>
+                            <p className="text-xs text-steel-800 mt-1">{photo.description}</p>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                 )}
@@ -210,13 +213,16 @@ export const ReportContent = ({ data, agencyProfile }: ReportContentProps) => {
               Allegato al presente report viene consegnato un fascicolo fotografico contenente {data.photos.length} immagini documentali.
             </p>
             <div className="grid grid-cols-2 gap-4 mt-4">
-              {data.photos.map((photo) => photo.url && (
-                <div key={photo.id} className="border border-slate-300 p-2 rounded-lg bg-white">
-                  <img src={photo.url} alt={photo.description} className="w-full h-48 object-cover mb-2 rounded" />
-                  <p className="text-xs text-steel-700">{photo.time} - {photo.location}</p>
-                  <p className="text-xs text-steel-800 mt-1">{photo.description}</p>
-                </div>
-              ))}
+              {data.photos.map((photo) => {
+                console.log('Rendering photo for separate dossier:', photo.url); // LOGGING
+                return photo.url && (
+                  <div key={photo.id} className="border border-slate-300 p-2 rounded-lg bg-white">
+                    <img src={photo.url} alt={photo.description} className="w-full h-48 object-cover mb-2 rounded" />
+                    <p className="text-xs text-steel-700">{photo.time} - {photo.location}</p>
+                    <p className="text-xs text-steel-800 mt-1">{photo.description}</p>
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}

@@ -38,6 +38,7 @@ export const PhotosSection = ({ data, onUpdate }: PhotosSectionProps) => {
       try {
         // Extract the file path from the public URL
         const urlParts = photoToRemove.url.split('/');
+        // The path starts after the bucket name, which is 'report-photos'
         const filePath = urlParts.slice(urlParts.indexOf('report-photos') + 1).join('/');
 
         const { error: deleteError } = await supabase.storage
@@ -80,7 +81,7 @@ export const PhotosSection = ({ data, onUpdate }: PhotosSectionProps) => {
       const file = event.target.files[0];
       const fileExt = file.name.split('.').pop();
       const fileName = `${photoId}-${Math.random()}.${fileExt}`; // Use photoId for uniqueness
-      const filePath = `report-photos/${fileName}`; // Path within the bucket
+      const filePath = `${fileName}`; // Path within the bucket, no subfolder needed if bucket is 'report-photos'
 
       // Upload to Supabase Storage
       const { error: uploadError } = await supabase.storage
@@ -98,6 +99,7 @@ export const PhotosSection = ({ data, onUpdate }: PhotosSectionProps) => {
 
       if (publicUrlData) {
         updatePhoto(photoId, 'url', publicUrlData.publicUrl);
+        console.log('Foto caricata. URL pubblico:', publicUrlData.publicUrl); // LOGGING
         toast({
           title: "Successo",
           description: "Foto caricata su Supabase Storage.",
