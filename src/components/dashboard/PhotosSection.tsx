@@ -7,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { ChevronDown, Camera, Upload, Trash2, Image, Loader2 } from 'lucide-react';
 import { Photo } from '@/hooks/useInvestigationData';
-import { supabase } from '@/integrations/supabase/client';
+// import { supabase } from '@/integrations/supabase/client'; // No longer needed for photo upload
 import { useToast } from '@/components/ui/use-toast';
 
 interface PhotosSectionProps {
@@ -32,30 +32,10 @@ export const PhotosSection = ({ data, onUpdate }: PhotosSectionProps) => {
     onUpdate([...data, newPhoto]);
   };
 
-  const removePhoto = async (id: string, url?: string) => {
-    // If there's a URL, try to delete the file from Supabase Storage
-    if (url) {
-      try {
-        const fileName = url.split('/').pop(); // Extract file name from URL
-        if (fileName) {
-          const { error } = await supabase.storage.from('agency-logos').remove([`public/${fileName}`]);
-          if (error) {
-            console.error('Error deleting file from storage:', error);
-            toast({
-              title: "Errore",
-              description: "Impossibile eliminare la foto dallo storage.",
-              variant: "destructive",
-            });
-          } else {
-            toast({
-              title: "Successo",
-              description: "Foto eliminata dallo storage.",
-            });
-          }
-        }
-      } catch (error) {
-        console.error('Error during storage deletion:', error);
-      }
+  const removePhoto = (id: string, url?: string) => {
+    // Revoke the Blob URL to free up memory if it exists
+    if (url && url.startsWith('blob:')) {
+      URL.revokeObjectURL(url);
     }
     onUpdate(data.filter(photo => photo.id !== id));
   };
@@ -74,34 +54,20 @@ export const PhotosSection = ({ data, onUpdate }: PhotosSectionProps) => {
       }
 
       const file = event.target.files[0];
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${photoId}-${Math.random()}.${fileExt}`; // Use photoId for unique naming
-      const filePath = `public/${fileName}`;
+      
+      // Create a local URL for the image (Blob URL)
+      const localUrl = URL.createObjectURL(file);
 
-      const { error: uploadError } = await supabase.storage
-        .from('agency-logos')
-        .upload(filePath, file);
-
-      if (uploadError) {
-        throw uploadError;
-      }
-
-      const { data: publicUrlData } = supabase.storage
-        .from('agency-logos')
-        .getPublicUrl(filePath);
-
-      if (publicUrlData) {
-        updatePhoto(photoId, 'url', publicUrlData.publicUrl);
-        toast({
-          title: "Successo",
-          description: "Foto caricata con successo!",
-        });
-      }
+      updatePhoto(photoId, 'url', localUrl);
+      toast({
+        title: "Successo",
+        description: "Foto caricata localmente per l'anteprima.",
+      });
     } catch (error) {
-      console.error('Error uploading photo:', error);
+      console.error('Error processing photo:', error);
       toast({
         title: "Errore",
-        description: "Impossibile caricare la foto.",
+        description: "Impossibile caricare la foto localmente.",
         variant: "destructive",
       });
     } finally {
