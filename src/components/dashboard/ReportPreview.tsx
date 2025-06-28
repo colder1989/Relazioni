@@ -73,11 +73,16 @@ export const ReportPreview = ({ data, agencyProfile, onClose }: ReportPreviewPro
 
       try {
         await html2pdf().set({ 
-          html2canvas: { useCORS: true, scale: 2, allowTaint: true },
+          margin: [20, 15, 20, 15], // Margini per il PDF (top, left, bottom, right)
+          filename: 'Relazione_Investigativa_Anteprima.pdf',
+          image: { type: 'jpeg', quality: 0.98 },
+          html2canvas: { scale: 2, useCORS: true, allowTaint: true, logging: false }, // Mantieni per le immagini
           jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
           pagebreak: { mode: ['css', 'legacy'] }, // Migliora la gestione dei salti pagina
-          margin: [20, 15, 20, 15] // Margini per il PDF (top, left, bottom, right)
-        }).from(reportRef.current).save('Relazione_Investigativa_Anteprima.pdf');
+          // Imposta la modalità 'html' per rendere il testo selezionabile
+          // Attenzione: potrebbe causare piccole differenze di layout con CSS complessi
+          mode: 'html' 
+        }).from(reportRef.current).save();
 
         toast({
           title: "Successo",
