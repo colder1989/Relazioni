@@ -14,7 +14,7 @@ import { PhotoManagementSection } from './dashboard/PhotoManagementSection';
 import { ConclusionsSection } from './dashboard/ConclusionsSection';
 import { PrivacySection } from './dashboard/PrivacySection';
 import { ReportPreview } from './dashboard/ReportPreview';
-import { ReportContent } from './dashboard/ReportContent'; // Corrected import path
+import { ReportContent } from './dashboard/ReportContent';
 import { useInvestigationData } from '@/hooks/useInvestigationData';
 import { useSession } from '@/components/SessionContextProvider';
 import { supabase } from '@/integrations/supabase/client';
@@ -53,11 +53,15 @@ export const InvestigationDashboard = () => {
           .eq('id', session.user.id)
           .single();
 
-        if (error) {
+        if (error && error.code !== 'PGRST116') { // PGRST116 means no rows found
           console.error('Error fetching agency profile:', error);
         } else if (data) {
           setAgencyProfile(data);
+        } else {
+          setAgencyProfile(null); // Ensure profile is null if not found
         }
+      } else {
+        setAgencyProfile(null); // Clear profile if no session
       }
     };
 
@@ -92,6 +96,9 @@ export const InvestigationDashboard = () => {
       });
     });
     await Promise.all(imageLoadPromises);
+
+    // Add a small additional delay to ensure all rendering is complete
+    await new Promise(resolve => setTimeout(resolve, 500));
 
     html2pdf().from(tempDiv).save('Relazione_Investigativa.pdf').then(() => {
       root.unmount();
