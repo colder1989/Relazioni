@@ -14,7 +14,7 @@ import { PhotoManagementSection } from './dashboard/PhotoManagementSection';
 import { ConclusionsSection } from './dashboard/ConclusionsSection';
 import { PrivacySection } from './dashboard/PrivacySection';
 import { ReportPreview } from './dashboard/ReportPreview';
-import { ReportContent } from './ReportContent'; // Corrected import path
+import { ReportContent } from './dashboard/ReportContent'; // Corrected import path
 import { useInvestigationData } from '@/hooks/useInvestigationData';
 import { useSession } from '@/components/SessionContextProvider';
 import { supabase } from '@/integrations/supabase/client';
