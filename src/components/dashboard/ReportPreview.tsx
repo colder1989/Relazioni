@@ -5,6 +5,7 @@ import { InvestigationData, Photo } from '@/hooks/useInvestigationData';
 import { ReportContent } from './ReportContent';
 import html2pdf from 'html2pdf.js';
 import { useToast } from '@/components/ui/use-toast';
+import { getProxyImageUrl } from '@/lib/utils'; // Importa getProxyImageUrl
 
 interface ReportPreviewProps {
   data: InvestigationData;
@@ -26,34 +27,12 @@ export const ReportPreview = ({ data, agencyProfile, onClose }: ReportPreviewPro
   const [previewData, setPreviewData] = useState<InvestigationData | null>(null);
   const [previewAgencyProfile, setPreviewAgencyProfile] = useState<typeof agencyProfile | null>(null);
 
-  // Funzione per ottenere l'URL proxy dell'immagine
-  const getProxyImageUrl = (originalUrl: string) => {
-    if (!originalUrl) return ''; // Gestisci il caso di URL vuoto
-    const supabaseProjectId = "pdufmdtcuwbedrkzoeko"; // Il tuo Project ID Supabase
-    return `https://${supabaseProjectId}.supabase.co/functions/v1/image-proxy?url=${encodeURIComponent(originalUrl)}`;
-  };
-
   useEffect(() => {
     const preparePreview = async () => {
       setIsPreparingPreview(true);
-      let tempAgencyProfile = agencyProfile;
-      let tempPhotos: Photo[] = [];
-
-      // Pre-process agency logo URL
-      if (agencyProfile?.agency_logo_url) {
-        tempAgencyProfile = { ...agencyProfile, agency_logo_url: getProxyImageUrl(agencyProfile.agency_logo_url) };
-      }
-
-      // Pre-process report photos URLs
-      if (data.photos && data.photos.length > 0) {
-        tempPhotos = data.photos.map(photo => ({
-          ...photo,
-          url: photo.url ? getProxyImageUrl(photo.url) : ''
-        }));
-      }
-
-      setPreviewAgencyProfile(tempAgencyProfile);
-      setPreviewData({ ...data, photos: tempPhotos });
+      // Passa i dati originali a ReportContent, sarà ReportContent a usare il proxy
+      setPreviewAgencyProfile(agencyProfile);
+      setPreviewData(data);
       setIsPreparingPreview(false);
     };
 
@@ -89,13 +68,13 @@ export const ReportPreview = ({ data, agencyProfile, onClose }: ReportPreviewPro
       await Promise.all(imageLoadPromises);
 
       // Add a small additional delay to ensure all rendering is complete
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Increased additional delay
+      await new Promise(resolve => setTimeout(resolve, 2000)); // Aumentato il ritardo
 
       console.log("Content of reportRef.current before PDF generation:", reportRef.current.innerHTML); // Debugging log
 
       try {
         await html2pdf().set({ 
-          html2canvas: { useCORS: true, scale: 2 }, // Added useCORS and increased scale for better quality
+          html2canvas: { useCORS: true, scale: 2, allowTaint: true }, // Aggiunto allowTaint
           jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
         }).from(reportRef.current).save('Relazione_Investigativa_Anteprima.pdf');
 

@@ -21,6 +21,7 @@ import { supabase } from '@/integrations/supabase/client';
 import html2pdf from 'html2pdf.js';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/components/ui/use-toast';
+import { getProxyImageUrl } from '@/lib/utils'; // Importa getProxyImageUrl
 
 interface AgencyProfile {
   first_name: string;
@@ -73,13 +74,6 @@ export const InvestigationDashboard = () => {
     }
   }, [session, isSessionLoading]);
 
-  // Funzione per ottenere l'URL proxy dell'immagine
-  const getProxyImageUrl = (originalUrl: string) => {
-    if (!originalUrl) return ''; // Gestisci il caso di URL vuoto
-    const supabaseProjectId = "pdufmdtcuwbedrkzoeko"; // Il tuo Project ID Supabase
-    return `https://${supabaseProjectId}.supabase.co/functions/v1/image-proxy?url=${encodeURIComponent(originalUrl)}`;
-  };
-
   const handleDirectExportPDF = async () => {
     setIsExporting(true);
     toast({
@@ -92,29 +86,15 @@ export const InvestigationDashboard = () => {
     let tempPhotos: Photo[] = [];
 
     try {
-      // Pre-process agency logo URL
-      if (agencyProfile?.agency_logo_url) {
-        tempAgencyProfile = { ...agencyProfile, agency_logo_url: getProxyImageUrl(agencyProfile.agency_logo_url) };
-      }
-
-      // Pre-process report photos URLs
-      if (data.photos && data.photos.length > 0) {
-        tempPhotos = data.photos.map(photo => ({
-          ...photo,
-          url: photo.url ? getProxyImageUrl(photo.url) : ''
-        }));
-      }
+      // Non è necessario pre-processare gli URL qui, ReportContent lo farà
+      // Passa i dati originali a ReportContent
+      tempAgencyProfile = agencyProfile;
+      tempPhotos = data.photos;
 
       const tempDiv = document.createElement('div');
-      tempDiv.style.position = 'absolute';
-      tempDiv.style.left = '-9999px';
-      tempDiv.style.top = '-9999px';
-      tempDiv.style.width = '210mm'; // A4 width
-      tempDiv.style.height = '297mm'; // A4 height
-      tempDiv.style.overflow = 'hidden';
+      // Rimosse le proprietà di stile che potrebbero interferire
       document.body.appendChild(tempDiv);
 
-      // Pass the className to ReportContent to ensure Tailwind styles are applied
       const root = ReactDOM.createRoot(tempDiv);
       root.render(
         <ReportContent 
@@ -125,12 +105,12 @@ export const InvestigationDashboard = () => {
       );
 
       // Give React time to render the content into the temporary div
-      await new Promise(resolve => setTimeout(resolve, 1500)); 
+      await new Promise(resolve => setTimeout(resolve, 2000)); // Aumentato il ritardo
 
       console.log("Content of tempDiv before PDF generation:", tempDiv.innerHTML); // Debugging log
 
       await html2pdf().set({ 
-        html2canvas: { useCORS: true, scale: 2 }, 
+        html2canvas: { useCORS: true, scale: 2, allowTaint: true }, // Aggiunto allowTaint
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
       }).from(tempDiv).save('Relazione_Investigativa.pdf');
       
