@@ -14,7 +14,8 @@ import { PhotoManagementSection } from './dashboard/PhotoManagementSection';
 import { ConclusionsSection } from './dashboard/ConclusionsSection';
 import { PrivacySection } from './dashboard/PrivacySection';
 import { ReportPreview } from './dashboard/ReportPreview';
-import { ReportContent } from './dashboard/ReportContent';
+import { ReportTemplate } from './dashboard/ReportTemplate'; // Mantenuto per la preview interna
+import { FalcoPDFTemplate } from './dashboard/FalcoPDFTemplate'; // Nuovo import per il template PDF
 import { useInvestigationData, Photo } from '@/hooks/useInvestigationData';
 import { useSession } from '@/components/SessionContextProvider';
 import { supabase } from '@/integrations/supabase/client';
@@ -90,39 +91,53 @@ export const InvestigationDashboard = () => {
       document.body.appendChild(tempDiv);
 
       root = ReactDOM.createRoot(tempDiv);
+      // Render the FalcoPDFTemplate into the temporary div
       root.render(
-        <>
-          {/* Render cover page */}
-          <ReportContent 
-            data={data} 
-            agencyProfile={agencyProfile} 
-            isCoverPage={true} 
-            className="print-page-break" 
-          />
-          {/* Render subsequent pages content */}
-          <ReportContent 
-            data={data} 
-            agencyProfile={agencyProfile} 
-            isCoverPage={false} 
-          />
-        </>
+        <FalcoPDFTemplate data={data} agencyProfile={agencyProfile} />
       );
 
-      await new Promise(resolve => setTimeout(resolve, 2000)); // Give React time to render
+      // Give React time to render and images to load
+      await new Promise(resolve => setTimeout(resolve, 2000)); 
+
+      // Ensure the element is visible for html2pdf.js to capture it correctly
+      const element = document.getElementById('falco-pdf-template');
+      if (element) {
+        element.style.display = 'block';
+      }
 
       console.log("Content of tempDiv before PDF generation:", tempDiv.innerHTML);
 
-      await html2pdf().set({ 
-        margin: [20, 15, 20, 15], // Margini per il PDF (top, left, bottom, right)
-        filename: 'Relazione_Investigativa.pdf',
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true, allowTaint: true, logging: false }, // Mantieni per le immagini
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-        pagebreak: { mode: ['css', 'legacy'] }, // Migliora la gestione dei salti pagina
-        // Imposta la modalità 'html' per rendere il testo selezionabile
-        // Attenzione: potrebbe causare piccole differenze di layout con CSS complessi
-        mode: 'html' 
-      }).from(tempDiv).save();
+      const options = {
+        margin: [10, 10, 15, 10], // Margini in mm
+        filename: `Report_Investigativo_${data.investigatedInfo.fullName.replace(/\s/g, '_') || 'Sconosciuto'}_${new Date().toISOString().split('T')[0]}.pdf`,
+        image: { 
+          type: 'jpeg', 
+          quality: 0.98 
+        },
+        html2canvas: { 
+          scale: 2,
+          useCORS: true,
+          letterRendering: true,
+          allowTaint: false,
+          backgroundColor: '#ffffff',
+          // height: window.innerHeight, // These can cause issues with multi-page documents
+          // width: window.innerWidth // These can cause issues with multi-page documents
+        },
+        jsPDF: { 
+          unit: 'mm', 
+          format: 'a4', 
+          orientation: 'portrait',
+          compress: true
+        },
+        pagebreak: { 
+          mode: ['avoid-all', 'css', 'legacy'],
+          before: '.page-break',
+          avoid: ['.no-break', '.signature-section', '.header-info']
+        },
+        mode: 'html' // Keep HTML mode for selectable text
+      };
+
+      await html2pdf().set(options).from(element).save();
       
       toast({
         title: "Successo",
@@ -140,6 +155,11 @@ export const InvestigationDashboard = () => {
       if (root && tempDiv && tempDiv.parentNode) {
         root.unmount();
         document.body.removeChild(tempDiv);
+      }
+      // Ensure the element is hidden again
+      const element = document.getElementById('falco-pdf-template');
+      if (element) {
+        element.style.display = 'none';
       }
     }
   };
@@ -265,6 +285,7 @@ export const InvestigationDashboard = () => {
       <div className="max-w-7xl mx-auto px-6 py-8">
         {showPreview ? (
           <div className="fade-in">
+            {/* La preview continua ad usare ReportTemplate per la visualizzazione a schermo */}
             <ReportPreview data={data} agencyProfile={agencyProfile} onClose={() => setShowPreview(false)} />
           </div>
         ) : (

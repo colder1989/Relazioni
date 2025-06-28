@@ -2,7 +2,8 @@ import React, { useRef, useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { X, Download, FileText, Loader2 } from 'lucide-react';
 import { InvestigationData, Photo } from '@/hooks/useInvestigationData';
-import { ReportContent } from './ReportContent';
+import { ReportTemplate } from './ReportTemplate'; // Mantenuto per la visualizzazione a schermo
+import { FalcoPDFTemplate } from './FalcoPDFTemplate'; // Nuovo import per il template PDF
 import html2pdf from 'html2pdf.js';
 import { useToast } from '@/components/ui/use-toast';
 import { getProxyImageUrl } from '@/lib/utils'; // Importa getProxyImageUrl
@@ -21,11 +22,13 @@ interface ReportPreviewProps {
 }
 
 export const ReportPreview = ({ data, agencyProfile, onClose }: ReportPreviewProps) => {
-  const reportRef = useRef<HTMLDivElement>(null);
+  const reportRef = useRef<HTMLDivElement>(null); // Used for displaying the preview
+  const pdfExportRef = useRef<HTMLDivElement>(null); // New ref for the hidden PDF export element
   const { toast } = useToast();
   const [isPreparingPreview, setIsPreparingPreview] = useState(true);
   const [previewData, setPreviewData] = useState<InvestigationData | null>(null);
   const [previewAgencyProfile, setPreviewAgencyProfile] = useState<typeof agencyProfile | null>(null);
+  const [isExporting, setIsExporting] = useState(false); // New state for export loading
 
   useEffect(() => {
     const preparePreview = async () => {
@@ -48,53 +51,88 @@ export const ReportPreview = ({ data, agencyProfile, onClose }: ReportPreviewPro
       return;
     }
 
-    if (reportRef.current) {
+    setIsExporting(true);
+    toast({
+      title: "Esportazione PDF",
+      description: "Preparazione del report per l'esportazione...",
+      duration: 3000,
+    });
+
+    let tempDiv: HTMLDivElement | null = null;
+    let root: ReactDOM.Root | null = null;
+
+    try {
+      tempDiv = document.createElement('div');
+      document.body.appendChild(tempDiv);
+
+      root = ReactDOM.createRoot(tempDiv);
+      // Render the FalcoPDFTemplate into the temporary div for export
+      root.render(
+        <FalcoPDFTemplate data={previewData} agencyProfile={previewAgencyProfile} />
+      );
+
+      // Give React time to render and images to load
+      await new Promise(resolve => setTimeout(resolve, 2000)); 
+
+      // Ensure the element is visible for html2pdf.js to capture it correctly
+      const element = document.getElementById('falco-pdf-template');
+      if (element) {
+        element.style.display = 'block';
+      }
+
+      console.log("Content of tempDiv before PDF generation:", tempDiv.innerHTML);
+
+      const options = {
+        margin: [10, 10, 15, 10], // Margini in mm
+        filename: `Report_Investigativo_${previewData.investigatedInfo.fullName.replace(/\s/g, '_') || 'Sconosciuto'}_${new Date().toISOString().split('T')[0]}.pdf`,
+        image: { 
+          type: 'jpeg', 
+          quality: 0.98 
+        },
+        html2canvas: { 
+          scale: 2,
+          useCORS: true,
+          letterRendering: true,
+          allowTaint: false,
+          backgroundColor: '#ffffff',
+        },
+        jsPDF: { 
+          unit: 'mm', 
+          format: 'a4', 
+          orientation: 'portrait',
+          compress: true
+        },
+        pagebreak: { 
+          mode: ['avoid-all', 'css', 'legacy'],
+          before: '.page-break',
+          avoid: ['.no-break', '.signature-section', '.header-info']
+        },
+        mode: 'html' 
+      };
+
+      await html2pdf().set(options).from(element).save();
+
       toast({
-        title: "Esportazione PDF",
-        description: "Preparazione del report per l'esportazione...",
-        duration: 3000,
+        title: "Successo",
+        description: "Report PDF esportato con successo!",
       });
-
-      // Wait for all images within the preview to load before exporting
-      const images = reportRef.current.querySelectorAll('img');
-      const imageLoadPromises = Array.from(images).map(img => {
-        if (img.complete) return Promise.resolve();
-        return new Promise(resolve => {
-          img.onload = resolve;
-          img.onerror = resolve; // Resolve even on error to not block
-        });
+    } catch (error) {
+      console.error('Error exporting PDF:', error);
+      toast({
+        title: "Errore",
+        description: "Impossibile esportare il report PDF.",
+        variant: "destructive",
       });
-      await Promise.all(imageLoadPromises);
-
-      // Add a small additional delay to ensure all rendering is complete
-      await new Promise(resolve => setTimeout(resolve, 2000));
-
-      console.log("Content of reportRef.current before PDF generation:", reportRef.current.innerHTML);
-
-      try {
-        await html2pdf().set({ 
-          margin: [20, 15, 20, 15], // Margini per il PDF (top, left, bottom, right)
-          filename: 'Relazione_Investigativa_Anteprima.pdf',
-          image: { type: 'jpeg', quality: 0.98 },
-          html2canvas: { scale: 2, useCORS: true, allowTaint: true, logging: false }, // Mantieni per le immagini
-          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-          pagebreak: { mode: ['css', 'legacy'] }, // Migliora la gestione dei salti pagina
-          // Imposta la modalità 'html' per rendere il testo selezionabile
-          // Attenzione: potrebbe causare piccole differenze di layout con CSS complessi
-          mode: 'html' 
-        }).from(reportRef.current).save();
-
-        toast({
-          title: "Successo",
-          description: "Report PDF esportato con successo!",
-        });
-      } catch (error) {
-        console.error('Error exporting PDF:', error);
-        toast({
-          title: "Errore",
-          description: "Impossibile esportare il report PDF.",
-          variant: "destructive",
-        });
+    } finally {
+      setIsExporting(false);
+      if (root && tempDiv && tempDiv.parentNode) {
+        root.unmount();
+        document.body.removeChild(tempDiv);
+      }
+      // Ensure the element is hidden again
+      const element = document.getElementById('falco-pdf-template');
+      if (element) {
+        element.style.display = 'none';
       }
     }
   };
@@ -115,14 +153,14 @@ export const ReportPreview = ({ data, agencyProfile, onClose }: ReportPreviewPro
               size="sm"
               onClick={handleExportPDF}
               className="floating-button flex items-center space-x-2"
-              disabled={isPreparingPreview}
+              disabled={isPreparingPreview || isExporting}
             >
-              {isPreparingPreview ? (
+              {isExporting ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               ) : (
                 <Download className="w-4 h-4" />
               )}
-              <span>{isPreparingPreview ? 'Caricamento...' : 'Esporta PDF'}</span>
+              <span>{isExporting ? 'Esportazione...' : 'Esporta PDF'}</span>
             </Button>
             <Button variant="outline" size="sm" onClick={onClose} className="text-steel-700 hover:text-steel-900">
               <X className="w-4 h-4" />
@@ -137,12 +175,11 @@ export const ReportPreview = ({ data, agencyProfile, onClose }: ReportPreviewPro
           </div>
         ) : (
           <div className="overflow-y-auto flex-grow" ref={reportRef}>
+            {/* The preview still uses ReportTemplate for on-screen display */}
             {previewData && previewAgencyProfile && (
               <>
-                {/* Render cover page */}
-                <ReportContent data={previewData} agencyProfile={previewAgencyProfile} isCoverPage={true} className="print-page-break" />
-                {/* Render subsequent pages content */}
-                <ReportContent data={previewData} agencyProfile={previewAgencyProfile} isCoverPage={false} />
+                <ReportTemplate data={previewData} agencyProfile={previewAgencyProfile} isCoverPage={true} className="print-page-break" />
+                <ReportTemplate data={previewData} agencyProfile={previewAgencyProfile} isCoverPage={false} />
               </>
             )}
           </div>
