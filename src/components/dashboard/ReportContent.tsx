@@ -5,6 +5,8 @@ import { cn, getProxyImageUrl } from '@/lib/utils';
 interface ReportContentProps {
   data: InvestigationData;
   agencyProfile: {
+    first_name: string; // Added for signature
+    last_name: string;   // Added for signature
     agency_name: string;
     agency_address: string;
     agency_phone: string;
@@ -13,7 +15,7 @@ interface ReportContentProps {
     agency_logo_url: string;
   } | null;
   className?: string;
-  isCoverPage?: boolean; // Nuovo prop per indicare se è la pagina di copertina
+  isCoverPage?: boolean; // New prop to indicate if it's the cover page
 }
 
 export const ReportContent = ({ data, agencyProfile, className, isCoverPage = false }: ReportContentProps) => {
@@ -43,7 +45,7 @@ export const ReportContent = ({ data, agencyProfile, className, isCoverPage = fa
     return data.photos.filter(photo => photo.date === dayDate);
   };
 
-  // Logo di fallback incorporato come stringa Base64 (un'icona di scudo semplice)
+  // Fallback logo embedded as a Base64 string (a simple shield icon)
   const FALLBACK_LOGO_BASE64 = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJsdWNpZGUgbHVjaWRlLXnoaWVsZCI+PHBhdGggZD0iTTEyIDIyczgtNCA4LTEwVjVsLTgtMy04IDN2N2MwIDYgOCAxMCA4IDEweiIvPjwvc3ZnPg==";
 
   const Header = () => (
@@ -71,7 +73,8 @@ export const ReportContent = ({ data, agencyProfile, className, isCoverPage = fa
     </div>
   );
 
-  const Footer = () => (
+  // The CoverPageFooter component is now only for the cover page's detailed agency info
+  const CoverPageFooter = () => (
     <div className="text-center text-xs text-steel-700 mt-8">
       <p>{agencyProfile?.agency_name || "FALCO INVESTIGATION"} - {agencyProfile?.agency_address || "20124 MILANO (MI) – VIA SABAUDIA 8"}</p>
       <p>Tel {agencyProfile?.agency_phone || "+39 02 82 19 79 69"} - P.Iva IT11535690967</p>
@@ -84,23 +87,27 @@ export const ReportContent = ({ data, agencyProfile, className, isCoverPage = fa
     return (
       <div className={cn("p-8 font-inter text-sm leading-relaxed bg-falco-cream text-steel-900 min-h-[297mm] flex flex-col justify-between", className)}>
         <div>
-          {/* Header for cover page - larger logo */}
+          {/* Header for cover page - larger logo and agency details */}
           <div className="flex justify-between items-start mb-24">
-            {agencyProfile?.agency_logo_url ? (
-              <img 
-                src={getProxyImageUrl(agencyProfile.agency_logo_url)} 
-                alt={agencyProfile.agency_name || "Agency Logo"} 
-                className="h-32 w-auto object-contain"
-                crossOrigin="anonymous"
-              />
-            ) : (
-              <img 
-                src={FALLBACK_LOGO_BASE64} 
-                alt="Falco Investigation Logo" 
-                className="h-32 w-auto"
-                crossOrigin="anonymous"
-              />
-            )}
+            {/* Centered Logo */}
+            <div className="flex-1 flex justify-center"> {/* Added flex-1 and justify-center */}
+              {agencyProfile?.agency_logo_url ? (
+                <img 
+                  src={getProxyImageUrl(agencyProfile.agency_logo_url)} 
+                  alt={agencyProfile.agency_name || "Agency Logo"} 
+                  className="h-32 w-auto object-contain"
+                  crossOrigin="anonymous"
+                />
+              ) : (
+                <img 
+                  src={FALLBACK_LOGO_BASE64} 
+                  alt="Falco Investigation Logo" 
+                  className="h-32 w-auto"
+                  crossOrigin="anonymous"
+                />
+              )}
+            </div>
+            {/* Agency Contact Info on the right */}
             <div className="text-right text-xs text-steel-700">
               <p className="font-bold">{agencyProfile?.agency_name || "FALCO INVESTIGATION"}</p>
               <p>{agencyProfile?.agency_address || "20124 MILANO (MI) – VIA SABAUDIA 8"}</p>
@@ -130,14 +137,16 @@ export const ReportContent = ({ data, agencyProfile, className, isCoverPage = fa
             )}
           </div>
         </div>
-        {/* No footer on cover page */}
+        {/* Footer for cover page only */}
+        <CoverPageFooter />
       </div>
     );
   }
 
+  // Content for non-cover pages
   return (
     <div className={cn("p-8 font-inter text-sm leading-relaxed bg-falco-cream text-steel-900", className)}>
-      <Header />
+      <Header /> {/* Header only on non-cover pages */}
       <div className="space-y-8 max-w-3xl mx-auto">
         {/* Introduction/Premise */}
         <div className="mb-8 text-justify">
@@ -238,14 +247,14 @@ export const ReportContent = ({ data, agencyProfile, className, isCoverPage = fa
                 {data.photoManagement.photoStrategy === 'per-day' && getPhotosForDay(day.date).length > 0 && (
                   <div className="mt-4">
                     <h5 className="font-semibold mb-2 text-sm text-steel-900 text-center">Documentazione Fotografica del Giorno:</h5>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-2 gap-4 justify-items-center"> {/* Added justify-items-center */}
                       {getPhotosForDay(day.date).map((photo) => {
                         return photo.url && (
-                          <div key={photo.id} className="border border-slate-300 p-2 rounded-lg bg-white flex justify-center items-center aspect-w-2 aspect-h-3">
+                          <div key={photo.id} className="border border-slate-300 p-2 rounded-lg bg-white flex justify-center items-center aspect-w-2 aspect-h-3 relative w-full max-w-[150px]"> {/* Added relative and max-w */}
                             <img 
                               src={getProxyImageUrl(photo.url)} 
                               alt={photo.description} 
-                              className="w-full object-contain rounded" 
+                              className="w-full h-full object-contain rounded" 
                               crossOrigin="anonymous"
                             />
                             <div className="absolute bottom-2 left-2 right-2 bg-white/70 p-1 rounded text-center">
@@ -270,14 +279,14 @@ export const ReportContent = ({ data, agencyProfile, className, isCoverPage = fa
             <p className="text-justify text-steel-900">
               Allegato al presente report viene consegnato un fascicolo fotografico contenente {data.photos.length} immagini documentali.
             </p>
-            <div className="grid grid-cols-2 gap-4 mt-4">
+            <div className="grid grid-cols-2 gap-4 mt-4 justify-items-center"> {/* Added justify-items-center */}
               {data.photos.map((photo) => {
                 return photo.url && (
-                  <div key={photo.id} className="border border-slate-300 p-2 rounded-lg bg-white flex justify-center items-center aspect-w-2 aspect-h-3">
+                  <div key={photo.id} className="border border-slate-300 p-2 rounded-lg bg-white flex justify-center items-center aspect-w-2 aspect-h-3 relative w-full max-w-[150px]"> {/* Added relative and max-w */}
                     <img 
                       src={getProxyImageUrl(photo.url)} 
                       alt={photo.description} 
-                      className="w-full object-contain rounded" 
+                      className="w-full h-full object-contain rounded" 
                       crossOrigin="anonymous"
                     />
                     <div className="absolute bottom-2 left-2 right-2 bg-white/70 p-1 rounded text-center">
@@ -332,7 +341,7 @@ export const ReportContent = ({ data, agencyProfile, className, isCoverPage = fa
           )}
         </div>
       </div>
-      <Footer />
+      {/* No footer on non-cover pages */}
     </div>
   );
 };
