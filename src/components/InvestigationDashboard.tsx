@@ -88,8 +88,9 @@ export const InvestigationDashboard = () => {
     tempDiv.style.overflow = 'hidden';
     document.body.appendChild(tempDiv);
 
+    // Pass the className to ReportContent to ensure Tailwind styles are applied
     const root = ReactDOM.createRoot(tempDiv);
-    root.render(<ReportContent data={data} agencyProfile={agencyProfile} />);
+    root.render(<ReportContent data={data} agencyProfile={agencyProfile} className="p-8 font-inter text-sm leading-relaxed bg-falco-cream text-steel-900" />);
 
     // Give React time to render the content into the temporary div
     await new Promise(resolve => setTimeout(resolve, 1500)); // Increased delay
