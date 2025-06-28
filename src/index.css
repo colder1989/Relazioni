@@ -1,0 +1,436 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Professional design system for Falco Investigation - Dark Professional Theme */
+
+@layer base {
+  :root {
+    --background: 15 23 42;
+    --foreground: 248 250 252;
+
+    --card: 30 41 59;
+    --card-foreground: 248 250 252;
+
+    --popover: 30 41 59;
+    --popover-foreground: 248 250 252;
+
+    --primary: 59 130 246;
+    --primary-foreground: 15 23 42;
+
+    --secondary: 51 65 85;
+    --secondary-foreground: 248 250 252;
+
+    --muted: 51 65 85;
+    --muted-foreground: 148 163 184;
+
+    --accent: 71 85 105;
+    --accent-foreground: 248 250 252;
+
+    --destructive: 239 68 68;
+    --destructive-foreground: 248 250 252;
+
+    --border: 71 85 105;
+    --input: 51 65 85;
+    --ring: 59 130 246;
+
+    --radius: 0.75rem;
+
+    --sidebar-background: 15 23 42;
+    --sidebar-foreground: 248 250 252;
+    --sidebar-primary: 59 130 246;
+    --sidebar-primary-foreground: 15 23 42;
+    --sidebar-accent: 51 65 85;
+    --sidebar-accent-foreground: 248 250 252;
+    --sidebar-border: 71 85 105;
+    --sidebar-ring: 59 130 246;
+
+    /* Professional investigative colors */
+    --steel-900: 15 23 42;     /* Very dark steel blue */
+    --steel-800: 30 41 59;     /* Dark steel blue */
+    --steel-700: 51 65 85;     /* Medium steel blue */
+    --steel-600: 71 85 105;    /* Light steel blue */
+    --steel-500: 100 116 139;  /* Lighter steel blue */
+    --steel-400: 148 163 184;  /* Very light steel blue */
+    
+    --accent-blue: 59 130 246; /* Professional blue accent */
+    --accent-cyan: 6 182 212;  /* Cyan accent for highlights */
+    --success-green: 34 197 94; /* Success green */
+    --warning-amber: 245 158 11; /* Warning amber */
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-steel-900 text-foreground font-inter;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-playfair text-slate-100;
+  }
+}
+
+@layer components {
+  /* Professional investigative card design */
+  .section-card {
+    background: linear-gradient(145deg, #1e293b 0%, #334155 100%);
+    border: 1px solid #475569;
+    box-shadow: 
+      0 4px 6px -1px rgba(0, 0, 0, 0.3),
+      0 2px 4px -1px rgba(0, 0, 0, 0.2),
+      inset 0 1px 0 rgba(148, 163, 184, 0.1);
+    @apply rounded-xl transition-all duration-300 transform hover:-translate-y-1 hover:shadow-2xl;
+  }
+  
+  .section-card:hover {
+    background: linear-gradient(145deg, #334155 0%, #475569 100%);
+    box-shadow: 
+      0 20px 25px -5px rgba(0, 0, 0, 0.4),
+      0 10px 10px -5px rgba(0, 0, 0, 0.3),
+      inset 0 1px 0 rgba(59, 130, 246, 0.2);
+    border-color: #3b82f6;
+  }
+  
+  /* Fix for card header hover - keep dark background */
+  .section-card .hover\\:bg-slate-50:hover {
+    background: linear-gradient(145deg, #475569 0%, #64748b 100%) !important;
+    color: #f1f5f9 !important;
+  }
+  
+  /* Professional input styling with visible placeholders */
+  .professional-input {
+    background: linear-gradient(145deg, #334155 0%, #475569 100%);
+    border: 1px solid #64748b;
+    color: #f1f5f9 !important;
+    @apply transition-all duration-200 rounded-lg;
+  }
+  
+  .professional-input::placeholder {
+    color: #94a3b8 !important;
+    opacity: 1 !important;
+    font-weight: 400;
+    font-style: italic;
+  }
+  
+  .professional-input:hover {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.2);
+  }
+  
+  .professional-input:focus {
+    border-color: #3b82f6;
+    box-shadow: 
+      0 0 0 3px rgba(59, 130, 246, 0.1),
+      0 0 0 1px #3b82f6;
+    background: linear-gradient(145deg, #475569 0%, #334155 100%);
+  }
+  
+  /* Investigative gradient */
+  .falco-gradient {
+    background: linear-gradient(135deg, #1e40af 0%, #3b82f6 50%, #06b6d4 100%);
+  }
+  
+  .professional-accent {
+    background: linear-gradient(145deg, #475569 0%, #64748b 100%);
+    border: 1px solid #64748b;
+    @apply text-slate-200 backdrop-blur-sm;
+  }
+  
+  /* Enhanced animations */
+  .fade-in {
+    animation: fadeIn 0.6s ease-out forwards;
+  }
+  
+  .slide-in-up {
+    animation: slideInUp 0.5s ease-out forwards;
+  }
+  
+  .stagger-item {
+    opacity: 0;
+    transform: translateY(30px);
+    animation: staggerFadeIn 0.7s ease-out forwards;
+  }
+  
+  /* Professional progress bar */
+  .progress-bar {
+    background: linear-gradient(90deg, #334155 0%, #475569 100%);
+    border: 1px solid #64748b;
+    @apply relative overflow-hidden rounded-full h-4;
+  }
+  
+  .progress-fill {
+    background: linear-gradient(90deg, #1e40af 0%, #3b82f6 50%, #06b6d4 100%);
+    @apply h-full rounded-full transition-all duration-1000 ease-out;
+    background-size: 200% 100%;
+    animation: shimmer 3s infinite;
+    box-shadow: 
+      0 0 10px rgba(59, 130, 246, 0.5),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  }
+  
+  /* Professional buttons */
+  .floating-button {
+    background: linear-gradient(145deg, #475569 0%, #64748b 100%);
+    border: 1px solid #64748b;
+    color: #f1f5f9 !important;
+    @apply transform transition-all duration-200 hover:scale-105 active:scale-95;
+  }
+  
+  .floating-button:hover {
+    background: linear-gradient(145deg, #64748b 0%, #475569 100%);
+    border-color: #3b82f6;
+    color: #f1f5f9 !important;
+    box-shadow: 
+      0 10px 15px -3px rgba(0, 0, 0, 0.3),
+      0 0 0 1px rgba(59, 130, 246, 0.3);
+  }
+  
+  /* Glass effect for header */
+  .glass-effect {
+    background: rgba(30, 41, 59, 0.85);
+    border: 1px solid rgba(71, 85, 105, 0.3);
+    @apply backdrop-blur-md;
+  }
+
+  /* Professional hover states - FIXED */
+  .professional-hover {
+    @apply transition-all duration-200;
+  }
+  
+  .professional-hover:hover {
+    background: linear-gradient(145deg, #475569 0%, #334155 100%) !important;
+    border-color: #3b82f6;
+    color: #f1f5f9 !important;
+    transform: translateY(-1px);
+  }
+
+  /* Status indicators */
+  .status-complete {
+    background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+    @apply text-white;
+  }
+  
+  .status-progress {
+    background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+    @apply text-white;
+  }
+  
+  .status-pending {
+    background: linear-gradient(135deg, #d97706 0%, #f59e0b 100%);
+    @apply text-white;
+  }
+
+  /* Professional badges */
+  .professional-badge {
+    background: linear-gradient(145deg, #334155 0%, #475569 100%);
+    border: 1px solid #64748b;
+    color: #e2e8f0;
+    @apply px-3 py-1 rounded-full text-sm font-medium;
+  }
+
+  /* Investigative sidebar styling */
+  .investigative-sidebar {
+    background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
+    border-right: 1px solid #475569;
+    box-shadow: 4px 0 6px -1px rgba(0, 0, 0, 0.3);
+  }
+
+  /* Professional step indicators */
+  .step-indicator {
+    background: linear-gradient(135deg, #334155 0%, #475569 100%);
+    border: 2px solid #64748b;
+    @apply w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold text-slate-200;
+  }
+  
+  .step-indicator.active {
+    background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+    border-color: #3b82f6;
+    color: white;
+    box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+  }
+
+  /* Enhanced text visibility */
+  .text-visible {
+    color: #f1f5f9 !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  }
+  
+  .text-muted-visible {
+    color: #cbd5e1 !important;
+  }
+  
+  .text-accent-visible {
+    color: #94a3b8 !important;
+  }
+
+  /* Fix for white backgrounds in dropdowns and selects */
+  .bg-white {
+    background: linear-gradient(145deg, #334155 0%, #475569 100%) !important;
+    color: #f1f5f9 !important;
+  }
+
+  /* Fix for select content */
+  [data-radix-select-content] {
+    background: linear-gradient(145deg, #334155 0%, #475569 100%) !important;
+    border: 1px solid #64748b !important;
+    color: #f1f5f9 !important;
+  }
+
+  /* Fix for select items */
+  [data-radix-select-item] {
+    color: #f1f5f9 !important;
+  }
+
+  [data-radix-select-item]:hover {
+    background: linear-gradient(145deg, #475569 0%, #64748b 100%) !important;
+    color: #f1f5f9 !important;
+  }
+
+  /* Fix for buttons with white backgrounds */
+  .bg-slate-50 {
+    background: linear-gradient(145deg, #475569 0%, #64748b 100%) !important;
+    color: #f1f5f9 !important;
+  }
+
+  /* Fix for any remaining white backgrounds */
+  .bg-background {
+    background: linear-gradient(145deg, #334155 0%, #475569 100%) !important;
+    color: #f1f5f9 !important;
+  }
+
+  /* Fix for card content areas */
+  .bg-slate-50\/50 {
+    background: linear-gradient(145deg, #334155 0%, #475569 100%) !important;
+    color: #f1f5f9 !important;
+  }
+}
+
+/* Enhanced keyframes */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes staggerFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(30px) rotateX(10deg);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) rotateX(0deg);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 15px rgba(59, 130, 246, 0);
+  }
+}
+
+/* Stagger animation delays */
+.stagger-item:nth-child(1) { animation-delay: 0.1s; }
+.stagger-item:nth-child(2) { animation-delay: 0.2s; }
+.stagger-item:nth-child(3) { animation-delay: 0.3s; }
+.stagger-item:nth-child(4) { animation-delay: 0.4s; }
+.stagger-item:nth-child(5) { animation-delay: 0.5s; }
+.stagger-item:nth-child(6) { animation-delay: 0.6s; }
+.stagger-item:nth-child(7) { animation-delay: 0.7s; }
+.stagger-item:nth-child(8) { animation-delay: 0.8s; }
+.stagger-item:nth-child(9) { animation-delay: 0.9s; }
+
+/* Professional hover effects */
+.hover-lift {
+  @apply transition-all duration-300;
+}
+
+.hover-lift:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4);
+}
+
+.button-press {
+  @apply transition-all duration-100 active:scale-95 active:shadow-inner;
+}
+
+/* Print styles for PDF generation */
+@media print {
+  body {
+    @apply text-black bg-white;
+  }
+  
+  .no-print {
+    display: none !important;
+  }
+  
+  .print-page-break {
+    page-break-before: always;
+  }
+}
+
+/* Professional scrollbar */
+::-webkit-scrollbar {
+  width: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1e293b;
+  border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #475569 0%, #64748b 100%);
+  border-radius: 6px;
+  border: 2px solid #1e293b;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #64748b 0%, #3b82f6 100%);
+}
+
+/* Professional selection */
+::selection {
+  background: rgba(59, 130, 246, 0.3);
+  color: #f1f5f9;
+}
+
+/* Focus indicators */
+*:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
