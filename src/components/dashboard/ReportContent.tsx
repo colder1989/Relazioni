@@ -1,6 +1,6 @@
 import React from 'react';
 import { InvestigationData, Photo } from '@/hooks/useInvestigationData';
-import { cn, getProxyImageUrl } from '@/lib/utils'; // Importa getProxyImageUrl
+import { cn, getProxyImageUrl } from '@/lib/utils'; // Rimosso imageUrlToBase64
 
 interface ReportContentProps {
   data: InvestigationData;
@@ -43,36 +43,27 @@ export const ReportContent = ({ data, agencyProfile, className }: ReportContentP
   };
 
   // Logo di fallback incorporato come stringa Base64 (un'icona di scudo semplice)
-  const FALLBACK_LOGO_BASE64 = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJsdWNpZGUgbHVjaWRlLXNoaWVsZCI+PHBhdGggZD0iTTEyIDIyczgtNCA4LTEwVjVsLTgtMy04IDN2N2MwIDYgOCAxMCA4IDEweiIvPjwvc3ZnPg==";
-
-  // Funzione per verificare se un URL è un URL di Supabase Storage
-  const isSupabaseStorageUrl = (url: string) => {
-    return url.includes('supabase.co/storage/v1/object/public/');
-  };
+  const FALLBACK_LOGO_BASE64 = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJsdWNpZGUgbHVjaWRlLXnoaWVsZCI+PHBhdGggZD0iTTEyIDIyczgtNCA4LTEwVjVsLTgtMy04IDN2N2MwIDYgOCAxMCA4IDEweiIvPjwvc3ZnPg==";
 
   return (
     <div className={cn("p-8 font-inter text-sm leading-relaxed bg-falco-cream text-steel-900", className)}> {/* Apply base styles and className */}
       <div className="space-y-8 max-w-3xl mx-auto">
         {/* Header with Logo and Date */}
         <div className="flex justify-between items-start mb-8">
-          {agencyProfile?.agency_logo_url && isSupabaseStorageUrl(agencyProfile.agency_logo_url) ? (
-            <>
-              {console.log('ReportContent: Using Agency Logo URL:', agencyProfile.agency_logo_url)}
-              <img 
-                src={getProxyImageUrl(agencyProfile.agency_logo_url)} // Usa l'URL proxy
-                alt={agencyProfile.agency_name || "Agency Logo"} 
-                className="h-24 w-auto object-contain"
-              />
-            </>
+          {agencyProfile?.agency_logo_url ? (
+            <img 
+              src={getProxyImageUrl(agencyProfile.agency_logo_url)} 
+              alt={agencyProfile.agency_name || "Agency Logo"} 
+              className="h-24 w-auto object-contain"
+              crossOrigin="anonymous" // Aggiunto per html2canvas
+            />
           ) : (
-            <>
-              {console.log('ReportContent: Using FALLBACK_LOGO_BASE64.')}
-              <img 
-                src={FALLBACK_LOGO_BASE64} // Usa l'URL Base64 per il fallback
-                alt="Falco Investigation Logo" 
-                className="h-24 w-auto"
-              />
-            </>
+            <img 
+              src={FALLBACK_LOGO_BASE64} 
+              alt="Falco Investigation Logo" 
+              className="h-24 w-auto"
+              crossOrigin="anonymous" // Aggiunto per html2canvas
+            />
           )}
           <div className="text-right text-xs text-steel-700">
             <p className="font-bold">{agencyProfile?.agency_name || "FALCO INVESTIGATION"}</p>
@@ -204,13 +195,13 @@ export const ReportContent = ({ data, agencyProfile, className }: ReportContentP
                     <h5 className="font-semibold mb-2 text-sm text-steel-900">Documentazione Fotografica del Giorno:</h5>
                     <div className="grid grid-cols-2 gap-4">
                       {getPhotosForDay(day.date).map((photo) => {
-                        console.log('ReportContent: Rendering photo for day:', photo.url);
                         return photo.url && (
                           <div key={photo.id} className="border border-slate-300 p-2 rounded-lg bg-white">
                             <img 
-                              src={getProxyImageUrl(photo.url)} // Usa l'URL proxy
+                              src={getProxyImageUrl(photo.url)} 
                               alt={photo.description} 
                               className="w-full h-48 object-cover mb-2 rounded" 
+                              crossOrigin="anonymous" // Aggiunto per html2canvas
                             />
                             <p className="text-xs text-steel-700">{photo.time} - {photo.location}</p>
                             <p className="text-xs text-steel-800 mt-1">{photo.description}</p>
@@ -234,13 +225,13 @@ export const ReportContent = ({ data, agencyProfile, className }: ReportContentP
             </p>
             <div className="grid grid-cols-2 gap-4 mt-4">
               {data.photos.map((photo) => {
-                console.log('ReportContent: Rendering photo for separate dossier:', photo.url);
                 return photo.url && (
                   <div key={photo.id} className="border border-slate-300 p-2 rounded-lg bg-white">
                     <img 
-                      src={getProxyImageUrl(photo.url)} // Usa l'URL proxy
+                      src={getProxyImageUrl(photo.url)} 
                       alt={photo.description} 
                       className="w-full h-48 object-cover mb-2 rounded" 
+                      crossOrigin="anonymous" // Aggiunto per html2canvas
                     />
                     <p className="text-xs text-steel-700">{photo.time} - {photo.location}</p>
                     <p className="text-xs text-steel-800 mt-1">{photo.description}</p>
