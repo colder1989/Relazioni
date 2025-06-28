@@ -14,15 +14,15 @@ import { PhotoManagementSection } from './dashboard/PhotoManagementSection';
 import { ConclusionsSection } from './dashboard/ConclusionsSection';
 import { PrivacySection } from './dashboard/PrivacySection';
 import { ReportPreview } from './dashboard/ReportPreview';
-import { ReportTemplate } from './dashboard/ReportTemplate'; // Mantenuto per la preview interna
-import { FalcoPDFTemplate } from './dashboard/FalcoPDFTemplate'; // Nuovo import per il template PDF
+import { ReportTemplate } from '@/components/dashboard/ReportTemplate'; // Aggiornato l'import a percorso assoluto
+import { FalcoPDFTemplate } from './dashboard/FalcoPDFTemplate';
 import { useInvestigationData, Photo } from '@/hooks/useInvestigationData';
 import { useSession } from '@/components/SessionContextProvider';
 import { supabase } from '@/integrations/supabase/client';
 import html2pdf from 'html2pdf.js';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/components/ui/use-toast';
-import { getProxyImageUrl } from '@/lib/utils'; // Importa getProxyImageUrl
+import { getProxyImageUrl } from '@/lib/utils';
 
 interface AgencyProfile {
   first_name: string;

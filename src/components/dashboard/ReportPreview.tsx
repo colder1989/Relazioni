@@ -2,11 +2,11 @@ import React, { useRef, useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { X, Download, FileText, Loader2 } from 'lucide-react';
 import { InvestigationData, Photo } from '@/hooks/useInvestigationData';
-import { ReportTemplate } from './ReportTemplate'; // Mantenuto per la visualizzazione a schermo
-import { FalcoPDFTemplate } from './FalcoPDFTemplate'; // Nuovo import per il template PDF
+import { ReportTemplate } from '@/components/dashboard/ReportTemplate'; // Aggiornato l'import a percorso assoluto
+import { FalcoPDFTemplate } from './FalcoPDFTemplate';
 import html2pdf from 'html2pdf.js';
 import { useToast } from '@/components/ui/use-toast';
-import { getProxyImageUrl } from '@/lib/utils'; // Importa getProxyImageUrl
+import { getProxyImageUrl } from '@/lib/utils';
 
 interface ReportPreviewProps {
   data: InvestigationData;
@@ -22,13 +22,12 @@ interface ReportPreviewProps {
 }
 
 export const ReportPreview = ({ data, agencyProfile, onClose }: ReportPreviewProps) => {
-  const reportRef = useRef<HTMLDivElement>(null); // Used for displaying the preview
-  const pdfExportRef = useRef<HTMLDivElement>(null); // New ref for the hidden PDF export element
+  const reportRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const [isPreparingPreview, setIsPreparingPreview] = useState(true);
   const [previewData, setPreviewData] = useState<InvestigationData | null>(null);
   const [previewAgencyProfile, setPreviewAgencyProfile] = useState<typeof agencyProfile | null>(null);
-  const [isExporting, setIsExporting] = useState(false); // New state for export loading
+  const [isExporting, setIsExporting] = useState(false);
 
   useEffect(() => {
     const preparePreview = async () => {
@@ -175,7 +174,6 @@ export const ReportPreview = ({ data, agencyProfile, onClose }: ReportPreviewPro
           </div>
         ) : (
           <div className="overflow-y-auto flex-grow" ref={reportRef}>
-            {/* The preview still uses ReportTemplate for on-screen display */}
             {previewData && previewAgencyProfile && (
               <>
                 <ReportTemplate data={previewData} agencyProfile={previewAgencyProfile} isCoverPage={true} className="print-page-break" />
