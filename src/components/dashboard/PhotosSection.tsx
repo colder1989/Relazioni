@@ -201,6 +201,7 @@ export const PhotosSection = ({ data, onUpdate }: PhotosSectionProps) => {
                       <div className="space-y-2">
                         <Label>Anteprima</Label>
                         <div className="border border-slate-200 rounded-lg overflow-hidden">
+                          {console.log('PhotosSection: Rendering photo with URL:', photo.url)}
                           <img 
                             src={photo.url} 
                             alt={`Foto ${index + 1}`}

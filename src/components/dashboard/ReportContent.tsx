@@ -46,11 +46,14 @@ export const ReportContent = ({ data, agencyProfile }: ReportContentProps) => {
         {/* Header with Logo and Date */}
         <div className="flex justify-between items-start mb-8">
           {agencyProfile?.agency_logo_url ? (
-            <img 
-              src={agencyProfile.agency_logo_url} 
-              alt={agencyProfile.agency_name || "Agency Logo"} 
-              className="h-24 w-auto object-contain"
-            />
+            <>
+              {console.log('ReportContent: Agency Logo URL:', agencyProfile.agency_logo_url)}
+              <img 
+                src={agencyProfile.agency_logo_url} 
+                alt={agencyProfile.agency_name || "Agency Logo"} 
+                className="h-24 w-auto object-contain"
+              />
+            </>
           ) : (
             <img 
               src="/lovable-uploads/ea7672d3-5fe4-45e8-bd81-ca137cc8caa8.png" 
@@ -188,7 +191,7 @@ export const ReportContent = ({ data, agencyProfile }: ReportContentProps) => {
                     <h5 className="font-semibold mb-2 text-sm text-steel-900">Documentazione Fotografica del Giorno:</h5>
                     <div className="grid grid-cols-2 gap-4">
                       {getPhotosForDay(day.date).map((photo) => {
-                        console.log('Rendering photo for day:', photo.url); // LOGGING
+                        console.log('ReportContent: Rendering photo for day:', photo.url);
                         return photo.url && (
                           <div key={photo.id} className="border border-slate-300 p-2 rounded-lg bg-white">
                             <img src={photo.url} alt={photo.description} className="w-full h-48 object-cover mb-2 rounded" />
@@ -214,7 +217,7 @@ export const ReportContent = ({ data, agencyProfile }: ReportContentProps) => {
             </p>
             <div className="grid grid-cols-2 gap-4 mt-4">
               {data.photos.map((photo) => {
-                console.log('Rendering photo for separate dossier:', photo.url); // LOGGING
+                console.log('ReportContent: Rendering photo for separate dossier:', photo.url);
                 return photo.url && (
                   <div key={photo.id} className="border border-slate-300 p-2 rounded-lg bg-white">
                     <img src={photo.url} alt={photo.description} className="w-full h-48 object-cover mb-2 rounded" />
