@@ -45,6 +45,8 @@ export const ReportPreview = ({ data, agencyProfile, onClose }: ReportPreviewPro
       // Add a small additional delay to ensure all rendering is complete
       await new Promise(resolve => setTimeout(resolve, 1000)); // Increased additional delay
 
+      console.log("Content of reportRef.current before PDF generation:", reportRef.current.innerHTML); // Debugging log
+
       try {
         await html2pdf().set({ 
           html2canvas: { useCORS: true, scale: 2 }, // Added useCORS and increased scale for better quality
@@ -93,7 +95,7 @@ export const ReportPreview = ({ data, agencyProfile, onClose }: ReportPreviewPro
         </div>
 
         <div className="overflow-y-auto flex-grow" ref={reportRef}>
-          <ReportContent data={data} agencyProfile={agencyProfile} />
+          <ReportContent data={data} agencyProfile={agencyProfile} className="p-8 font-inter text-sm leading-relaxed bg-falco-cream text-steel-900" /> {/* Pass className to ReportContent */}
         </div>
       </div>
     </div>

@@ -108,6 +108,8 @@ export const InvestigationDashboard = () => {
     // Add a small additional delay to ensure all rendering is complete
     await new Promise(resolve => setTimeout(resolve, 1000)); // Increased additional delay
 
+    console.log("Content of tempDiv before PDF generation:", tempDiv.innerHTML); // Debugging log
+
     try {
       await html2pdf().set({ 
         html2canvas: { useCORS: true, scale: 2 }, // Added useCORS and increased scale for better quality

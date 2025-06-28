@@ -1,5 +1,6 @@
 import React from 'react';
 import { InvestigationData, Photo } from '@/hooks/useInvestigationData';
+import { cn } from '@/lib/utils'; // Import cn utility
 
 interface ReportContentProps {
   data: InvestigationData;
@@ -11,9 +12,10 @@ interface ReportContentProps {
     agency_website: string;
     agency_logo_url: string;
   } | null;
+  className?: string; // Add className prop
 }
 
-export const ReportContent = ({ data, agencyProfile }: ReportContentProps) => {
+export const ReportContent = ({ data, agencyProfile, className }: ReportContentProps) => {
   const formatDate = (dateString: string) => {
     if (!dateString) return '';
     return new Date(dateString).toLocaleDateString('it-IT');
@@ -41,7 +43,7 @@ export const ReportContent = ({ data, agencyProfile }: ReportContentProps) => {
   };
 
   return (
-    <div className="p-8 font-inter text-sm leading-relaxed bg-falco-cream text-steel-900">
+    <div className={cn("p-8 font-inter text-sm leading-relaxed bg-falco-cream text-steel-900", className)}> {/* Apply base styles and className */}
       <div className="space-y-8 max-w-3xl mx-auto">
         {/* Header with Logo and Date */}
         <div className="flex justify-between items-start mb-8">
@@ -56,7 +58,7 @@ export const ReportContent = ({ data, agencyProfile }: ReportContentProps) => {
             </>
           ) : (
             <img 
-              src="/lovable-uploads/ea7672d3-5fe4-45e8-bd81-ca137cc8caa8.png" 
+              src="/lovable-uploads/ea7672d3-5fe4-45e8-bd81-ca1377c8caa8.png" 
               alt="Falco Investigation Logo" 
               className="h-24 w-auto"
             />
