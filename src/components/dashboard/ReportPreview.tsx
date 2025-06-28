@@ -2,7 +2,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { X, Download, FileText, Loader2 } from 'lucide-react';
 import { InvestigationData, Photo } from '@/hooks/useInvestigationData';
-import { ReportTemplate } from '@/components/dashboard/ReportTemplate'; // Aggiornato l'import a percorso assoluto
+import { ReportContent } from '@/components/dashboard/ReportContent'; // Corretto: da ReportTemplate a ReportContent
 import { FalcoPDFTemplate } from './FalcoPDFTemplate';
 import html2pdf from 'html2pdf.js';
 import { useToast } from '@/components/ui/use-toast';
@@ -176,8 +176,8 @@ export const ReportPreview = ({ data, agencyProfile, onClose }: ReportPreviewPro
           <div className="overflow-y-auto flex-grow" ref={reportRef}>
             {previewData && previewAgencyProfile && (
               <>
-                <ReportTemplate data={previewData} agencyProfile={previewAgencyProfile} isCoverPage={true} className="print-page-break" />
-                <ReportTemplate data={previewData} agencyProfile={previewAgencyProfile} isCoverPage={false} />
+                <ReportContent data={previewData} agencyProfile={previewAgencyProfile} isCoverPage={true} className="print-page-break" />
+                <ReportContent data={previewData} agencyProfile={previewAgencyProfile} isCoverPage={false} />
               </>
             )}
           </div>
