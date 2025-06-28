@@ -8,7 +8,6 @@ import { InvestigatedInfoSection } from './dashboard/InvestigatedInfoSection';
 import { MandateDetailsSection } from './dashboard/MandateDetailsSection';
 import { ObservationDaysSection } from './dashboard/ObservationDaysSection';
 import { PhotosSection } from './dashboard/PhotosSection';
-import { GamblingActivitiesSection } from './dashboard/GamblingActivitiesSection';
 import { AdditionalNotesSection } from './dashboard/AdditionalNotesSection';
 import { PhotoManagementSection } from './dashboard/PhotoManagementSection';
 import { ConclusionsSection } from './dashboard/ConclusionsSection';
@@ -153,12 +152,7 @@ export const InvestigationDashboard = () => {
                 />
               </div>
               
-              <div className="stagger-item">
-                <GamblingActivitiesSection 
-                  data={data.gamblingActivities} 
-                  onUpdate={(gamblingActivities) => updateData({ gamblingActivities })} 
-                />
-              </div>
+              {/* Removed GamblingActivitiesSection */}
               
               <div className="stagger-item">
                 <PhotosSection 
@@ -236,7 +230,7 @@ export const InvestigationDashboard = () => {
                       "Specifica dettagli del mandato",
                       "Configura gestione foto",
                       "Aggiungi giorni di osservazione",
-                      "Documenta attività di gioco (se rilevanti)",
+                      // Removed "Documenta attività di gioco (se rilevanti)",
                       "Carica foto e documenti",
                       "Aggiungi note extra se necessario",
                       "Scrivi le conclusioni",
@@ -274,10 +268,7 @@ export const InvestigationDashboard = () => {
                   </div>
                   
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="text-center p-4 professional-accent rounded-lg">
-                      <div className="text-2xl font-bold text-green-400">{data.gamblingActivities.length}</div>
-                      <div className="text-xs text-slate-300">Attività Gioco</div>
-                    </div>
+                    {/* Removed Gambling Activities Stat */}
                     <div className="text-center p-4 professional-accent rounded-lg">
                       <div className="text-2xl font-bold text-purple-400">{data.investigatedInfo.vehicles.length}</div>
                       <div className="text-xs text-slate-300">Veicoli Monitorati</div>

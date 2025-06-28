@@ -50,15 +50,6 @@ export interface Photo {
   url?: string;
 }
 
-export interface GamblingActivity {
-  id: string;
-  location: string;
-  address: string;
-  startTime: string;
-  endTime: string;
-  description: string;
-}
-
 export interface Conclusions {
   text: string;
 }
@@ -82,7 +73,6 @@ export interface InvestigationData {
   mandateDetails: MandateDetails;
   observationDays: ObservationDay[];
   photos: Photo[];
-  gamblingActivities: GamblingActivity[];
   additionalNotes: AdditionalNotes;
   photoManagement: PhotoManagement;
   conclusions: Conclusions;
@@ -113,7 +103,6 @@ const initialData: InvestigationData = {
   },
   observationDays: [],
   photos: [],
-  gamblingActivities: [],
   additionalNotes: {
     notes: '',
   },
