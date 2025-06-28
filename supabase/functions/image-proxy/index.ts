@@ -4,6 +4,8 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0';
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS', // Aggiunto
+  'Access-Control-Expose-Headers': 'Content-Length, Content-Type, ETag', // Aggiunto
 };
 
 serve(async (req) => {
@@ -35,7 +37,7 @@ serve(async (req) => {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
-    console.log('Edge Function: Service Role Key found.');
+    console.log('Edge Function: Supabase client created with service role key.');
 
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
