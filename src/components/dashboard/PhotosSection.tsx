@@ -5,7 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { ChevronDown, Camera, Upload, Trash2, Image } from 'lucide-react';
+import { ChevronDown, Camera, Upload, Trash2, Image, Loader2 } from 'lucide-react';
 import { Photo } from '@/hooks/useInvestigationData';
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client'; // Import supabase
@@ -17,6 +17,7 @@ interface PhotosSectionProps {
 
 export const PhotosSection = ({ data, onUpdate }: PhotosSectionProps) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [uploadingPhotoId, setUploadingPhotoId] = useState<string | null>(null);
   const { toast } = useToast();
 
   const addPhoto = () => {
@@ -31,9 +32,35 @@ export const PhotosSection = ({ data, onUpdate }: PhotosSectionProps) => {
     onUpdate([...data, newPhoto]);
   };
 
-  const removePhoto = (id: string) => {
-    // TODO: If photo was uploaded to Supabase, consider deleting it from storage here.
-    // For now, just remove from local state.
+  const removePhoto = async (id: string) => {
+    const photoToRemove = data.find(photo => photo.id === id);
+    if (photoToRemove && photoToRemove.url) {
+      try {
+        // Extract the file path from the public URL
+        const urlParts = photoToRemove.url.split('/');
+        const filePath = urlParts.slice(urlParts.indexOf('report-photos') + 1).join('/');
+
+        const { error: deleteError } = await supabase.storage
+          .from('report-photos')
+          .remove([filePath]);
+
+        if (deleteError) {
+          console.error('Error deleting photo from storage:', deleteError);
+          toast({
+            title: "Errore",
+            description: "Impossibile eliminare la foto dallo storage.",
+            variant: "destructive",
+          });
+        } else {
+          toast({
+            title: "Successo",
+            description: "Foto eliminata dallo storage.",
+          });
+        }
+      } catch (error) {
+        console.error('Error processing photo deletion:', error);
+      }
+    }
     onUpdate(data.filter(photo => photo.id !== id));
   };
 
@@ -45,6 +72,7 @@ export const PhotosSection = ({ data, onUpdate }: PhotosSectionProps) => {
 
   const handleFileChange = async (photoId: string, event: React.ChangeEvent<HTMLInputElement>) => {
     try {
+      setUploadingPhotoId(photoId);
       if (!event.target.files || event.target.files.length === 0) {
         throw new Error('Devi selezionare un\'immagine da caricare.');
       }
@@ -85,6 +113,8 @@ export const PhotosSection = ({ data, onUpdate }: PhotosSectionProps) => {
         description: `Impossibile caricare la foto: ${error.message}`,
         variant: "destructive",
       });
+    } finally {
+      setUploadingPhotoId(null);
     }
   };
 
@@ -140,6 +170,7 @@ export const PhotosSection = ({ data, onUpdate }: PhotosSectionProps) => {
                     size="sm"
                     onClick={() => removePhoto(photo.id)}
                     className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                    disabled={uploadingPhotoId === photo.id}
                   >
                     <Trash2 className="w-4 h-4" />
                   </Button>
@@ -154,7 +185,14 @@ export const PhotosSection = ({ data, onUpdate }: PhotosSectionProps) => {
                         accept="image/*"
                         onChange={(e) => handleFileChange(photo.id, e)}
                         className="professional-input"
+                        disabled={uploadingPhotoId === photo.id}
                       />
+                      {uploadingPhotoId === photo.id && (
+                        <div className="flex items-center text-sm text-blue-500 mt-2">
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Caricamento...
+                        </div>
+                      )}
                     </div>
 
                     {photo.url && (
