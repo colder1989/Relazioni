@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -24,6 +23,7 @@ export const PhotosSection = ({ data, onUpdate }: PhotosSectionProps) => {
       description: '',
       time: '',
       location: '',
+      date: '', // Initialize date for new photo
     };
     onUpdate([...data, newPhoto]);
   };
@@ -130,6 +130,15 @@ export const PhotosSection = ({ data, onUpdate }: PhotosSectionProps) => {
                   </div>
 
                   <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label>Data</Label>
+                      <Input
+                        type="date"
+                        value={photo.date}
+                        onChange={(e) => updatePhoto(photo.id, 'date', e.target.value)}
+                        className="professional-input"
+                      />
+                    </div>
                     <div className="space-y-2">
                       <Label>Ora</Label>
                       <Input

@@ -48,6 +48,7 @@ export interface Photo {
   time: string;
   location: string;
   url?: string;
+  date: string; // Added date field for photo
 }
 
 export interface Conclusions {

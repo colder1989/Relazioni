@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { X, Download, FileText } from 'lucide-react';
-import { InvestigationData } from '@/hooks/useInvestigationData';
+import { InvestigationData, Photo } from '@/hooks/useInvestigationData';
 
 interface ReportPreviewProps {
   data: InvestigationData;
@@ -32,6 +32,10 @@ export const ReportPreview = ({ data, onClose }: ReportPreviewProps) => {
   };
 
   const today = new Date().toISOString();
+
+  const getPhotosForDay = (dayDate: string): Photo[] => {
+    return data.photos.filter(photo => photo.date === dayDate);
+  };
 
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
@@ -83,21 +87,21 @@ export const ReportPreview = ({ data, onClose }: ReportPreviewProps) => {
 
             {/* Subject */}
             <div className="text-center mb-8">
-              <h1 className="text-xl font-playfair font-bold mb-2">OGGETTO: RELAZIONE INVESTIGATIVA</h1>
+              <h1 className="text-xl font-playfair font-bold mb-2 text-steel-900">OGGETTO: RELAZIONE INVESTIGATIVA</h1>
               {data.mandateDetails.assignmentDate && (
-                <p className="text-base font-medium">Riferimento Vostro incarico del {formatDate(data.mandateDetails.assignmentDate)}</p>
+                <p className="text-base font-medium text-steel-900">Riferimento Vostro incarico del {formatDate(data.mandateDetails.assignmentDate)}</p>
               )}
               {data.investigatedInfo.fullName && (
-                <p className="text-base font-medium">Persona di cui si chiede l'osservazione: {data.investigatedInfo.fullName}</p>
+                <p className="text-base font-medium text-steel-900">Persona di cui si chiede l'osservazione: {data.investigatedInfo.fullName}</p>
               )}
             </div>
 
             {/* Introduction/Premise */}
             <div className="mb-8 text-justify">
-              <p>
+              <p className="text-steel-900">
                 Con la presente, si rende conto dell'attività investigativa svolta su Vostro incarico, conferito in data {formatDate(data.mandateDetails.assignmentDate)}, al fine di tutelare il Vostro diritto di {data.mandateDetails.protectedRights || '[diritti tutelati]'}.
               </p>
-              <p className="mt-2">
+              <p className="mt-2 text-steel-900">
                 L'attività è stata svolta nel rispetto delle normative vigenti in materia di privacy (GDPR 679/2016) e del Codice Deontologico degli Investigatori Privati.
               </p>
             </div>
@@ -105,8 +109,8 @@ export const ReportPreview = ({ data, onClose }: ReportPreviewProps) => {
             {/* Client Details */}
             {data.clientInfo.fullName && (
               <div className="mb-6">
-                <h3 className="font-playfair font-bold mb-2 text-base uppercase">Generalità del Mandante</h3>
-                <p className="text-justify">
+                <h3 className="font-playfair font-bold mb-2 text-base uppercase text-steel-900">Generalità del Mandante</h3>
+                <p className="text-justify text-steel-900">
                   {data.clientInfo.fullName}
                   {data.clientInfo.birthDate && data.clientInfo.birthPlace && 
                     ` nata/o a ${data.clientInfo.birthPlace} il ${formatDate(data.clientInfo.birthDate)}`
@@ -122,8 +126,8 @@ export const ReportPreview = ({ data, onClose }: ReportPreviewProps) => {
             {/* Investigated Person */}
             {data.investigatedInfo.fullName && (
               <div className="mb-6">
-                <h3 className="font-playfair font-bold mb-2 text-base uppercase">Persona di cui si chiede l'osservazione</h3>
-                <p className="text-justify">
+                <h3 className="font-playfair font-bold mb-2 text-base uppercase text-steel-900">Persona di cui si chiede l'osservazione</h3>
+                <p className="text-justify text-steel-900">
                   {data.investigatedInfo.fullName}
                   {data.investigatedInfo.birthDate && data.investigatedInfo.birthPlace && 
                     `, nato/a a ${data.investigatedInfo.birthPlace} il ${formatDate(data.investigatedInfo.birthDate)}`
@@ -134,8 +138,8 @@ export const ReportPreview = ({ data, onClose }: ReportPreviewProps) => {
                 
                 {data.investigatedInfo.vehicles.length > 0 && (
                   <div className="mt-3">
-                    <p className="font-medium">L'osservato è solito utilizzare per i suoi spostamenti le seguenti autovetture:</p>
-                    <ul className="list-disc list-inside ml-4">
+                    <p className="font-medium text-steel-900">L'osservato è solito utilizzare per i suoi spostamenti le seguenti autovetture:</p>
+                    <ul className="list-disc list-inside ml-4 text-steel-900">
                       {data.investigatedInfo.vehicles.map((vehicle, index) => (
                         <li key={index}>
                           {vehicle.model} di colore {vehicle.color} targato {vehicle.licensePlate}
@@ -150,17 +154,17 @@ export const ReportPreview = ({ data, onClose }: ReportPreviewProps) => {
             {/* Mandate Purpose and Protected Rights */}
             {(data.mandateDetails.purpose || data.mandateDetails.protectedRights) && (
               <div className="mb-8">
-                <h3 className="font-playfair font-bold mb-2 text-base uppercase">Finalità del Mandato e Diritto che si intende tutelare</h3>
-                {data.mandateDetails.purpose && <p className="mb-2 text-justify">{data.mandateDetails.purpose}</p>}
-                {data.mandateDetails.protectedRights && <p className="text-justify">{data.mandateDetails.protectedRights}</p>}
+                <h3 className="font-playfair font-bold mb-2 text-base uppercase text-steel-900">Finalità del Mandato e Diritto che si intende tutelare</h3>
+                {data.mandateDetails.purpose && <p className="mb-2 text-justify text-steel-900">{data.mandateDetails.purpose}</p>}
+                {data.mandateDetails.protectedRights && <p className="text-justify text-steel-900">{data.mandateDetails.protectedRights}</p>}
               </div>
             )}
 
             {/* Investigation Results */}
             {data.observationDays.length > 0 && (
               <div className="mb-8">
-                <h3 className="font-playfair font-bold mb-4 text-base uppercase">Esito degli Accertamenti e dell'Attività di Osservazione Diretta</h3>
-                <p className="mb-4 text-justify">
+                <h3 className="font-playfair font-bold mb-4 text-base uppercase text-steel-900">Esito degli Accertamenti e dell'Attività di Osservazione Diretta</h3>
+                <p className="mb-4 text-justify text-steel-900">
                   Nel corso dell'accertamento svolto dal {data.observationDays.length > 0 ? formatDate(data.observationDays[0].date) : ''} 
                   {data.observationDays.length > 1 ? ` al ${formatDate(data.observationDays[data.observationDays.length - 1].date)}` : ''} 
                   sono emersi i seguenti elementi circa la finalità dell'indagine espletata:
@@ -168,7 +172,7 @@ export const ReportPreview = ({ data, onClose }: ReportPreviewProps) => {
                 
                 {data.observationDays.map((day, index) => (
                   <div key={day.id} className="mb-6">
-                    <h4 className="font-bold mb-2 text-base">
+                    <h4 className="font-bold mb-2 text-base text-steel-900">
                       Giorno {index + 1}: {new Date(day.date).toLocaleDateString('it-IT', { 
                         weekday: 'long', 
                         day: 'numeric', 
@@ -176,7 +180,7 @@ export const ReportPreview = ({ data, onClose }: ReportPreviewProps) => {
                         year: 'numeric' 
                       })}
                     </h4>
-                    <p className="text-justify">
+                    <p className="text-justify text-steel-900">
                       Dalle ore {formatTime(day.startTime)} alle ore {formatTime(day.endTime)}, sono state condotte attività di osservazione.
                       {day.locations.length > 0 && (
                         <span>
@@ -186,60 +190,71 @@ export const ReportPreview = ({ data, onClose }: ReportPreviewProps) => {
                       <br />
                       {day.description && <span className="mt-2 block whitespace-pre-wrap">{day.description}</span>}
                     </p>
+
+                    {/* Photos for this specific day (if per-day strategy) */}
+                    {data.photoManagement.photoStrategy === 'per-day' && getPhotosForDay(day.date).length > 0 && (
+                      <div className="mt-4">
+                        <h5 className="font-semibold mb-2 text-sm text-steel-900">Documentazione Fotografica del Giorno:</h5>
+                        <div className="grid grid-cols-2 gap-4">
+                          {getPhotosForDay(day.date).map((photo) => photo.url && (
+                            <div key={photo.id} className="border border-slate-300 p-2 rounded-lg bg-white">
+                              <img src={photo.url} alt={photo.description} className="w-full h-48 object-cover mb-2 rounded" />
+                              <p className="text-xs text-steel-700">{photo.time} - {photo.location}</p>
+                              <p className="text-xs text-steel-800 mt-1">{photo.description}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 ))}
+              </div>
+            )}
+
+            {/* Photos section (if separate-dossier strategy) */}
+            {data.photoManagement.photoStrategy === 'separate-dossier' && data.photos.length > 0 && (
+              <div className="mb-8">
+                <h3 className="font-playfair font-bold mb-2 text-base uppercase text-steel-900">Documentazione Fotografica</h3>
+                <p className="text-justify text-steel-900">
+                  Allegato al presente report viene consegnato un fascicolo fotografico contenente {data.photos.length} immagini documentali.
+                </p>
+                <div className="grid grid-cols-2 gap-4 mt-4">
+                  {data.photos.map((photo) => photo.url && (
+                    <div key={photo.id} className="border border-slate-300 p-2 rounded-lg bg-white">
+                      <img src={photo.url} alt={photo.description} className="w-full h-48 object-cover mb-2 rounded" />
+                      <p className="text-xs text-steel-700">{photo.time} - {photo.location}</p>
+                      <p className="text-xs text-steel-800 mt-1">{photo.description}</p>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
 
             {/* Conclusions */}
             {data.conclusions.text && (
               <div className="mb-8">
-                <h3 className="font-playfair font-bold mb-2 text-base uppercase">Conclusioni</h3>
-                <p className="text-justify whitespace-pre-wrap">{data.conclusions.text}</p>
+                <h3 className="font-playfair font-bold mb-2 text-base uppercase text-steel-900">Conclusioni</h3>
+                <p className="text-justify whitespace-pre-wrap text-steel-900">{data.conclusions.text}</p>
               </div>
             )}
 
             {/* Additional Notes */}
             {data.additionalNotes.notes && (
               <div className="mb-8">
-                <h3 className="font-playfair font-bold mb-2 text-base uppercase">Note Aggiuntive</h3>
-                <p className="text-justify whitespace-pre-wrap">{data.additionalNotes.notes}</p>
-              </div>
-            )}
-
-            {/* Photos section based on strategy */}
-            {data.photos.length > 0 && (
-              <div className="mb-8">
-                <h3 className="font-playfair font-bold mb-2 text-base uppercase">Documentazione Fotografica</h3>
-                <p className="text-justify">
-                  {data.photoManagement.photoStrategy === 'separate-dossier' 
-                    ? `Allegato al presente report viene consegnato un fascicolo fotografico contenente ${data.photos.length} immagini documentali.`
-                    : `Sono state acquisite ${data.photos.length} immagini documentali durante le attività di osservazione.`
-                  }
-                </p>
-                {data.photoManagement.photoStrategy === 'per-day' && (
-                  <div className="grid grid-cols-2 gap-4 mt-4">
-                    {data.photos.map((photo) => photo.url && (
-                      <div key={photo.id} className="border border-slate-300 p-2 rounded-lg">
-                        <img src={photo.url} alt={photo.description} className="w-full h-48 object-cover mb-2 rounded" />
-                        <p className="text-xs text-steel-700">{photo.time} - {photo.location}</p>
-                        <p className="text-xs text-steel-800 mt-1">{photo.description}</p>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                <h3 className="font-playfair font-bold mb-2 text-base uppercase text-steel-900">Note Aggiuntive</h3>
+                <p className="text-justify whitespace-pre-wrap text-steel-900">{data.additionalNotes.notes}</p>
               </div>
             )}
 
             {/* Closing Statement */}
             <div className="mb-8 text-justify">
-              <p>Tanto vi dovevamo per le Vs. eventuali e ulteriori valutazioni.</p>
+              <p className="text-steel-900">Tanto vi dovevamo per le Vs. eventuali e ulteriori valutazioni.</p>
             </div>
 
             {/* Signature */}
             <div className="text-right mb-12 mt-12">
-              <p className="font-bold text-base">INVESTIGATORE PRIVATO</p>
-              <p className="mt-2 text-base">Tripolino Alessandro</p>
+              <p className="font-bold text-base text-steel-900">INVESTIGATORE PRIVATO</p>
+              <p className="mt-2 text-base text-steel-900">Tripolino Alessandro</p>
             </div>
 
             {/* Privacy Notice */}
