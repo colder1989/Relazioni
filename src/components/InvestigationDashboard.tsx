@@ -84,18 +84,17 @@ export const InvestigationDashboard = () => {
 
     let tempAgencyProfile = agencyProfile;
     let tempPhotos: Photo[] = [];
+    let tempDiv: HTMLDivElement | null = null; // Declare tempDiv here
+    let root: ReactDOM.Root | null = null; // Declare root here
 
     try {
-      // Non è necessario pre-processare gli URL qui, ReportContent lo farà
-      // Passa i dati originali a ReportContent
       tempAgencyProfile = agencyProfile;
       tempPhotos = data.photos;
 
-      const tempDiv = document.createElement('div');
-      // Rimosse le proprietà di stile che potrebbero interferire
+      tempDiv = document.createElement('div');
       document.body.appendChild(tempDiv);
 
-      const root = ReactDOM.createRoot(tempDiv);
+      root = ReactDOM.createRoot(tempDiv);
       root.render(
         <ReportContent 
           data={{ ...data, photos: tempPhotos }} 
@@ -104,13 +103,12 @@ export const InvestigationDashboard = () => {
         />
       );
 
-      // Give React time to render the content into the temporary div
-      await new Promise(resolve => setTimeout(resolve, 2000)); // Aumentato il ritardo
+      await new Promise(resolve => setTimeout(resolve, 2000));
 
-      console.log("Content of tempDiv before PDF generation:", tempDiv.innerHTML); // Debugging log
+      console.log("Content of tempDiv before PDF generation:", tempDiv.innerHTML);
 
       await html2pdf().set({ 
-        html2canvas: { useCORS: true, scale: 2, allowTaint: true }, // Aggiunto allowTaint
+        html2canvas: { useCORS: true, scale: 2, allowTaint: true },
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
       }).from(tempDiv).save('Relazione_Investigativa.pdf');
       
@@ -127,7 +125,7 @@ export const InvestigationDashboard = () => {
       });
     } finally {
       setIsExporting(false);
-      if (tempDiv.parentNode) {
+      if (root && tempDiv && tempDiv.parentNode) { // Check if root and tempDiv are not null
         root.unmount();
         document.body.removeChild(tempDiv);
       }
