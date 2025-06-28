@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Upload, User, Building, Phone, Mail, Globe, Image as ImageIcon, LogOut } from 'lucide-react'; // Import LogOut
-import { useToast } => '@/components/ui/use-toast';
+import { useToast } from '@/components/ui/use-toast'; // Corretto: da '=>' a 'from'
 
 interface ProfileData {
   first_name: string;
