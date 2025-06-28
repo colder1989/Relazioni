@@ -5,9 +5,10 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
-import Login from "./pages/Login"; // Import Login page
-import Profile from "./pages/Profile"; // Import Profile page
-import { SessionContextProvider } from "./components/SessionContextProvider"; // Import SessionContextProvider
+import Login from "./pages/Login";
+import Profile from "./pages/Profile";
+import { SessionContextProvider } from "./components/SessionContextProvider";
+import { MainLayout } from "./components/MainLayout"; // Import MainLayout
 
 const queryClient = new QueryClient();
 
@@ -17,12 +18,14 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <SessionContextProvider> {/* Wrap routes with SessionContextProvider */}
+        <SessionContextProvider>
           <Routes>
-            <Route path="/login" element={<Login />} /> {/* Login route */}
-            <Route path="/profile" element={<Profile />} /> {/* Profile route */}
-            <Route path="/" element={<Index />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="/login" element={<Login />} /> {/* Login route is outside MainLayout */}
+            <Route element={<MainLayout />}> {/* Routes wrapped by MainLayout */}
+              <Route path="/" element={<Index />} />
+              <Route path="/profile" element={<Profile />} />
+              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
         </SessionContextProvider>
