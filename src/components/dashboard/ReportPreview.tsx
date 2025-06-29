@@ -2,7 +2,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { X, Download, FileText, Loader2 } from 'lucide-react';
 import { InvestigationData, Photo } from '@/hooks/useInvestigationData';
-import { FalcoPDFTemplate } from './FalcoPDFTemplate'; // Mantengo solo FalcoPDFTemplate
+import { FalcoPDFTemplate } from './FalcoPDFTemplate';
 import html2pdf from 'html2pdf.js';
 import { useToast } from '@/components/ui/use-toast';
 import { getProxyImageUrl } from '@/lib/utils';
