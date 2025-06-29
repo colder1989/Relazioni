@@ -14,8 +14,7 @@ import { PhotoManagementSection } from './dashboard/PhotoManagementSection';
 import { ConclusionsSection } from './dashboard/ConclusionsSection';
 import { PrivacySection } from './dashboard/PrivacySection';
 import { ReportPreview } from './dashboard/ReportPreview';
-import { ReportContent } from '@/components/dashboard/ReportContent'; // Corretto: da ReportTemplate a ReportContent
-import { FalcoPDFTemplate } from './dashboard/FalcoPDFTemplate';
+import { FalcoPDFTemplate } from './dashboard/FalcoPDFTemplate'; // Mantengo solo FalcoPDFTemplate
 import { useInvestigationData, Photo } from '@/hooks/useInvestigationData';
 import { useSession } from '@/components/SessionContextProvider';
 import { supabase } from '@/integrations/supabase/client';
@@ -285,7 +284,7 @@ export const InvestigationDashboard = () => {
       <div className="max-w-7xl mx-auto px-6 py-8">
         {showPreview ? (
           <div className="fade-in">
-            {/* La preview continua ad usare ReportContent per la visualizzazione a schermo */}
+            {/* La preview ora usa FalcoPDFTemplate per una rappresentazione fedele del PDF */}
             <ReportPreview data={data} agencyProfile={agencyProfile} onClose={() => setShowPreview(false)} />
           </div>
         ) : (
