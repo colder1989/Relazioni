@@ -38,9 +38,12 @@ export const FalcoPDFTemplate = ({ data, agencyProfile }: FalcoPDFTemplateProps)
           line-height: 1.4;
           color: #000;
           background: white;
-          width: 100%;
-          box-sizing: border-box; /* Ensure padding/border are included in width */
+          width: 210mm; /* Explicit A4 width */
+          height: 297mm; /* Explicit A4 height */
+          box-sizing: border-box; /* Ensure padding/border are included in width/height */
           padding: 10mm; /* Apply page margins as padding */
+          position: relative; /* Needed for absolute positioning of footer */
+          overflow: hidden; /* Hide anything that goes beyond A4 dimensions */
         }
         
         .header-info {
