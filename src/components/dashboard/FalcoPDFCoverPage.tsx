@@ -38,27 +38,23 @@ export const FalcoPDFCoverPage = ({ data, agencyProfile }: FalcoPDFCoverPageProp
   const FALLBACK_LOGO_BASE64 = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIGNsYXNzPSJsdWNpZGUgbHVjaWRlLXnoaWVsZCI+PHBhdGggZD0iTTEyIDIyczgtNCA4LTEwVjVsLTgtMy04IDN2N2MwIDYgOCAxMCA4IDEweiIvPjwvc3ZnPg==";
 
   return (
-    <div className="pdf-content" style={{ position: 'relative', minHeight: '297mm' }}> {/* Aggiunto position: relative e rimosso flexbox */}
-      <div>
-        {/* Data e luogo in alto a sinistra */}
-        <div style={{ textAlign: 'left', marginBottom: '30pt', fontSize: '11pt' }}>
-          Milano, {formatDateLong(today)}
-        </div>
-
+    <div className="pdf-content" style={{ position: 'relative', height: '297mm', width: '210mm', overflow: 'hidden', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: '10mm' }}>
+      {/* Contenuto principale della copertina */}
+      <div style={{ flexGrow: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-start' }}>
         {/* Logo aziendale in alto al centro */}
-        <div style={{ textAlign: 'center', margin: '20pt 0' }}>
+        <div style={{ textAlign: 'center', marginBottom: '20pt' }}>
           {agencyProfile?.agency_logo_url ? (
             <img 
               src={getProxyImageUrl(agencyProfile.agency_logo_url)} 
               alt={agencyProfile.agency_name || "Agency Logo"} 
-              style={{ maxHeight: '80pt', marginBottom: '10pt', display: 'block', margin: '0 auto' }}
+              style={{ maxHeight: '120pt', marginBottom: '10pt', display: 'block', margin: '0 auto' }}
               crossOrigin="anonymous"
             />
           ) : (
             <img 
               src={FALLBACK_LOGO_BASE64} 
               alt="Falco Investigation Logo" 
-              style={{ maxHeight: '80pt', marginBottom: '10pt', display: 'block', margin: '0 auto' }}
+              style={{ maxHeight: '120pt', marginBottom: '10pt', display: 'block', margin: '0 auto' }}
               crossOrigin="anonymous"
             />
           )}
@@ -66,16 +62,21 @@ export const FalcoPDFCoverPage = ({ data, agencyProfile }: FalcoPDFCoverPageProp
           <div className="company-subtitle">INVESTIGAZIONI-INDAGINI-RICERCHE</div>
         </div>
 
+        {/* Data e luogo in alto a sinistra, Mandante in alto a destra */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', marginBottom: '30pt', fontSize: '11pt' }}>
+          <div style={{ textAlign: 'left' }}>
+            Milano, {formatDateLong(today)}
+          </div>
+          {data.clientInfo.fullName && (
+            <div style={{ textAlign: 'right' }}>
+              Spett.le {data.clientInfo.fullName}<br/>
+              {data.clientInfo.address}<br/>
+            </div>
+          )}
+        </div>
+
         {/* Titolo report */}
         <div className="report-title">REPORT INVESTIGATIVO</div>
-
-        {/* Destinatario */}
-        {data.clientInfo.fullName && (
-          <div style={{ marginBottom: '20pt', textAlign: 'left' }}>
-            Spett.le {data.clientInfo.fullName}<br/>
-            {data.clientInfo.address}<br/>
-          </div>
-        )}
 
         {/* Sezioni del report */}
         <div className="section-title">GENERALITÀ DEL MANDANTE</div>
@@ -137,7 +138,7 @@ export const FalcoPDFCoverPage = ({ data, agencyProfile }: FalcoPDFCoverPageProp
       </div>
 
       {/* Footer aziendale per la prima pagina - Posizionato in modo assoluto */}
-      <div style={{ position: 'absolute', bottom: '10mm', left: '10mm', right: '10mm', textAlign: 'center', fontSize: '9pt', color: '#000', borderTop: '1pt solid #000', paddingTop: '10pt' }}>
+      <div style={{ textAlign: 'center', fontSize: '9pt', color: '#000', borderTop: '1pt solid #000', paddingTop: '10pt', width: '100%' }}>
         {agencyProfile?.agency_name || "FALCO INVESTIGATION"} - {agencyProfile?.agency_address || "20124 MILANO (MI) – VIA SABAUDIA 8"} - Tel {agencyProfile?.agency_phone || "+39 02 82 19 79 69"}<br/>
         P.Iva IT11535690967 Autorizzazione Prefettura Milano Prot. 14816/12B15E Area I OSP<br/>
         {agencyProfile?.agency_email || "milano@falcoinvestigation.it"} - {agencyProfile?.agency_website || "WWW.INVESTIGATIONFALCO.IT"}
