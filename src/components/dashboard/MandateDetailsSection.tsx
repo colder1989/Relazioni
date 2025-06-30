@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -17,10 +16,6 @@ interface MandateDetailsSectionProps {
 export const MandateDetailsSection = ({ data, onUpdate }: MandateDetailsSectionProps) => {
   const [isOpen, setIsOpen] = useState(true);
 
-  const handleChange = (field: keyof MandateDetails, value: string) => {
-    onUpdate({ ...data, [field]: value });
-  };
-
   const investigationTypes = [
     'Infedeltà coniugale',
     'Controllo patrimonio',
@@ -31,6 +26,59 @@ export const MandateDetailsSection = ({ data, onUpdate }: MandateDetailsSectionP
     'Ricerca persone',
     'Altro'
   ];
+
+  const investigationTypeDetails: { [key: string]: { purpose: string; protectedRights: string } } = {
+    'Infedeltà coniugale': {
+      purpose: 'Esecuzione di accertamenti volti a verificare l’esistenza di una relazione sentimentale e la condotta economico-finanziaria del soggetto, anche in relazione agli obblighi di mantenimento nei confronti del figlio minore.',
+      protectedRights: 'L’agenzia viene quindi incaricata, su esplicito mandato da parte del mandante, di svolgere ogni utile indagine investigativa finalizzata ad appurare se l’osservato intrattenga un’eventuale relazione sentimentale e se le condizioni economiche non permettano realmente di provvedere ad un sostegno economico da parte dell’osservato, come descritto dal mandante.'
+    },
+    'Controllo patrimonio': {
+      purpose: 'Verifica della situazione patrimoniale e finanziaria del soggetto, inclusi beni immobili, partecipazioni societarie e flussi di reddito.',
+      protectedRights: 'Tutela degli interessi economici e patrimoniali del mandante, prevenzione di frodi o recupero crediti.'
+    },
+    'Pedinamento': {
+      purpose: 'Monitoraggio degli spostamenti e delle attività del soggetto per documentarne la routine o specifici comportamenti.',
+      protectedRights: 'Acquisizione di prove documentali a tutela di diritti legali o personali.'
+    },
+    'Verifica comportamenti': {
+      purpose: 'Accertamento di comportamenti specifici del soggetto in relazione a sospetti o esigenze del mandante.',
+      protectedRights: 'Protezione della reputazione, della sicurezza o degli interessi legittimi del mandante.'
+    },
+    'Indagini aziendali': {
+      purpose: 'Raccolta di informazioni su dipendenti, soci o concorrenti per tutelare gli interessi aziendali.',
+      protectedRights: 'Protezione del patrimonio aziendale, della proprietà intellettuale e prevenzione di atti illeciti.'
+    },
+    'Controllo dipendenti': {
+      purpose: 'Monitoraggio della condotta dei dipendenti per verificare la fedeltà, il rispetto degli orari o l’uso improprio di risorse aziendali.',
+      protectedRights: 'Tutela degli interessi aziendali, prevenzione di furti, frodi o concorrenza sleale.'
+    },
+    'Ricerca persone': {
+      purpose: 'Localizzazione di persone scomparse o irreperibili per motivi legali o personali.',
+      protectedRights: 'Tutela del diritto alla conoscenza e alla protezione di persone vulnerabili.'
+    },
+    'Altro': {
+      purpose: '',
+      protectedRights: ''
+    }
+  };
+
+  const handleChange = (field: keyof MandateDetails, value: string) => {
+    onUpdate({ ...data, [field]: value });
+  };
+
+  const handleInvestigationTypeChange = (value: string) => {
+    const details = investigationTypeDetails[value];
+    if (details) {
+      onUpdate({ 
+        ...data, 
+        investigationType: value, 
+        purpose: details.purpose, 
+        protectedRights: details.protectedRights 
+      });
+    } else {
+      onUpdate({ ...data, investigationType: value, purpose: '', protectedRights: '' });
+    }
+  };
 
   return (
     <Card className="section-card">
@@ -65,7 +113,7 @@ export const MandateDetailsSection = ({ data, onUpdate }: MandateDetailsSectionP
               
               <div className="space-y-2">
                 <Label htmlFor="investigation-type">Tipo di Indagine *</Label>
-                <Select value={data.investigationType} onValueChange={(value) => handleChange('investigationType', value)}>
+                <Select value={data.investigationType} onValueChange={handleInvestigationTypeChange}>
                   <SelectTrigger className="professional-input">
                     <SelectValue placeholder="Seleziona tipo indagine" />
                   </SelectTrigger>

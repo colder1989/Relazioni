@@ -77,24 +77,22 @@ export const FalcoPDFReportContent = ({ data, agencyProfile }: FalcoPDFReportCon
               {data.photoManagement.photoStrategy === 'per-day' && getPhotosForDay(obs.date).length > 0 && (
                 <div style={{ marginTop: '15pt', textAlign: 'center' }}>
                   <h5 style={{ fontWeight: 'bold', marginBottom: '10pt', fontSize: '10pt' }}>Documentazione Fotografica del Giorno:</h5>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10pt', justifyContent: 'center' }}>
-                    {getPhotosForDay(obs.date).map((photo) => {
-                      return photo.url && (
-                        <div key={photo.id} style={{ border: '1pt solid #ccc', padding: '5pt', borderRadius: '5pt', background: '#fff', display: 'flex', flexDirection: 'column', alignItems: 'center', maxWidth: '150pt', margin: '0 auto' }}>
-                          <img 
-                            src={getProxyImageUrl(photo.url)} 
-                            alt={photo.description} 
-                            style={{ maxWidth: '100%', height: 'auto', display: 'block', marginBottom: '5pt' }}
-                            crossOrigin="anonymous"
-                          />
-                          <div style={{ fontSize: '8pt', color: '#555', textAlign: 'center' }}>
-                            <p>{photo.time} - {photo.location}</p>
-                            <p style={{ marginTop: '2pt' }}>{photo.description}</p>
-                          </div>
+                  {getPhotosForDay(obs.date).map((photo) => {
+                    return photo.url && (
+                      <div key={photo.id} style={{ border: '1pt solid #ccc', padding: '5pt', borderRadius: '5pt', background: '#fff', display: 'inline-block', margin: '5pt auto', maxWidth: '180mm', width: '100%', boxSizing: 'border-box' }}>
+                        <img 
+                          src={getProxyImageUrl(photo.url)} 
+                          alt={photo.description} 
+                          style={{ width: '100%', height: 'auto', display: 'block', marginBottom: '5pt' }}
+                          crossOrigin="anonymous"
+                        />
+                        <div style={{ fontSize: '8pt', color: '#555', textAlign: 'center', padding: '0 5pt 5pt' }}>
+                          <p>{photo.time} - {photo.location}</p>
+                          <p style={{ marginTop: '2pt' }}>{photo.description}</p>
                         </div>
-                      );
-                    })}
-                  </div>
+                      </div>
+                    );
+                  })}
                 </div>
               )}
             </div>
@@ -110,17 +108,17 @@ export const FalcoPDFReportContent = ({ data, agencyProfile }: FalcoPDFReportCon
           <div className="section-content">
             Allegato al presente report viene consegnato un fascicolo fotografico contenente {data.photos.length} immagini documentali.
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10pt', justifyContent: 'center', marginTop: '15pt' }}>
+          <div style={{ marginTop: '15pt', textAlign: 'center' }}>
             {data.photos.map((photo) => {
               return photo.url && (
-                <div key={photo.id} style={{ border: '1pt solid #ccc', padding: '5pt', borderRadius: '5pt', background: '#fff', display: 'flex', flexDirection: 'column', alignItems: 'center', maxWidth: '150pt', margin: '0 auto' }}>
+                <div key={photo.id} style={{ border: '1pt solid #ccc', padding: '5pt', borderRadius: '5pt', background: '#fff', display: 'inline-block', margin: '5pt auto', maxWidth: '180mm', width: '100%', boxSizing: 'border-box' }}>
                   <img 
                     src={getProxyImageUrl(photo.url)} 
                     alt={photo.description} 
-                    style={{ maxWidth: '100%', height: 'auto', display: 'block', marginBottom: '5pt' }}
+                    style={{ width: '100%', height: 'auto', display: 'block', marginBottom: '5pt' }}
                     crossOrigin="anonymous"
                   />
-                  <div style={{ fontSize: '8pt', color: '#555', textAlign: 'center' }}>
+                  <div style={{ fontSize: '8pt', color: '#555', textAlign: 'center', padding: '0 5pt 5pt' }}>
                     <p>{photo.time} - {photo.location}</p>
                     <p style={{ marginTop: '2pt' }}>{photo.description}</p>
                   </div>
