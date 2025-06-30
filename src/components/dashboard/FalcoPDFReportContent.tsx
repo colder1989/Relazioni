@@ -79,7 +79,7 @@ export const FalcoPDFReportContent = ({ data, agencyProfile }: FalcoPDFReportCon
                   <h5 style={{ fontWeight: 'bold', marginBottom: '10pt', fontSize: '10pt' }}>Documentazione Fotografica del Giorno:</h5>
                   {getPhotosForDay(obs.date).map((photo) => {
                     return photo.url && (
-                      <div key={photo.id} style={{ border: '1pt solid #ccc', padding: '5pt', borderRadius: '5pt', background: '#fff', display: 'inline-block', margin: '5pt auto', maxWidth: '180mm', width: '100%', boxSizing: 'border-box' }}>
+                      <div key={photo.id} style={{ border: '1pt solid #ccc', padding: '5pt', borderRadius: '5pt', background: '#fff', display: 'block', margin: '5pt auto', maxWidth: '180mm', width: '100%', boxSizing: 'border-box' }}>
                         <img 
                           src={getProxyImageUrl(photo.url)} 
                           alt={photo.description} 
@@ -111,7 +111,7 @@ export const FalcoPDFReportContent = ({ data, agencyProfile }: FalcoPDFReportCon
           <div style={{ marginTop: '15pt', textAlign: 'center' }}>
             {data.photos.map((photo) => {
               return photo.url && (
-                <div key={photo.id} style={{ border: '1pt solid #ccc', padding: '5pt', borderRadius: '5pt', background: '#fff', display: 'inline-block', margin: '5pt auto', maxWidth: '180mm', width: '100%', boxSizing: 'border-box' }}>
+                <div key={photo.id} style={{ border: '1pt solid #ccc', padding: '5pt', borderRadius: '5pt', background: '#fff', display: 'block', margin: '5pt auto', maxWidth: '180mm', width: '100%', boxSizing: 'border-box' }}>
                   <img 
                     src={getProxyImageUrl(photo.url)} 
                     alt={photo.description} 
