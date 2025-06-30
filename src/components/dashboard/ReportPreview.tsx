@@ -70,7 +70,7 @@ export const ReportPreview = ({ data, agencyProfile, onClose }: ReportPreviewPro
       );
 
       // Give React time to render and images to load
-      await new Promise(resolve => setTimeout(resolve, 2000)); 
+      await new Promise(resolve => setTimeout(resolve, 5000)); // Aumentato a 5 secondi
 
       // Ensure the element is visible for html2pdf.js to capture it correctly
       const element = document.getElementById('falco-pdf-template');
