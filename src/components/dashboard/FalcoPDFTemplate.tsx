@@ -24,7 +24,7 @@ export const FalcoPDFTemplate = ({ data, agencyProfile }: FalcoPDFTemplateProps)
       <style>{`
         @page {
           size: A4;
-          margin: 10mm;
+          margin: 10mm; /* Margini standard per tutte le pagine */
         }
         
         body {
@@ -32,18 +32,41 @@ export const FalcoPDFTemplate = ({ data, agencyProfile }: FalcoPDFTemplateProps)
           print-color-adjust: exact; /* Standard */
         }
 
-        .pdf-content {
+        /* Stili base per tutti i contenuti del PDF (copertina e report) */
+        .pdf-base-styles {
           font-family: 'Times New Roman', serif;
           font-size: 11pt;
           line-height: 1.4;
           color: #000;
           background: white;
-          width: 210mm; /* Explicit A4 width */
-          height: 297mm; /* Explicit A4 height */
-          box-sizing: border-box; /* Ensure padding/border are included in width/height */
-          padding: 10mm; /* Apply page margins as padding */
-          position: relative; /* Needed for absolute positioning of footer */
-          overflow: hidden; /* Hide anything that goes beyond A4 dimensions */
+          width: 210mm; /* Larghezza A4 esplicita */
+          box-sizing: border-box; /* Includi padding/border nella larghezza/altezza */
+          padding: 10mm; /* Applica i margini della pagina come padding interno */
+        }
+
+        /* Stili specifici per la pagina di copertina */
+        .pdf-cover-page-styles {
+          height: 297mm; /* Altezza A4 esplicita per la copertina */
+          position: relative; /* Necessario per il posizionamento assoluto del footer */
+          overflow: hidden; /* Nascondi qualsiasi cosa vada oltre le dimensioni A4 */
+          display: flex; /* Usa flexbox per distribuire il contenuto */
+          flex-direction: column;
+          justify-content: space-between; /* Spinge il contenuto in alto e il footer in basso */
+        }
+
+        /* Stili per il footer della pagina di copertina */
+        .cover-page-footer {
+          text-align: center;
+          font-size: 9pt;
+          color: #000;
+          border-top: 1pt solid #000;
+          padding-top: 10pt;
+          width: calc(100% - 20mm); /* Larghezza del contenuto meno i margini laterali */
+          position: absolute;
+          bottom: 10mm; /* Posiziona a 10mm dal fondo della pagina */
+          left: 10mm; /* Posiziona a 10mm dal bordo sinistro */
+          right: 10mm; /* Posiziona a 10mm dal bordo destro */
+          box-sizing: border-box;
         }
         
         .header-info {

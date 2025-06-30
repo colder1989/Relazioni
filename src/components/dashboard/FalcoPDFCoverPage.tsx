@@ -38,9 +38,9 @@ export const FalcoPDFCoverPage = ({ data, agencyProfile }: FalcoPDFCoverPageProp
   const FALLBACK_LOGO_BASE64 = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIGNsYXNzPSJsdWNpZGUgbHVjaWRlLXnoaWVsZCI+PHBhdGggZD0iTTEyIDIyczgtNCA4LTEwVjVsLTgtMy04IDN2N2MwIDYgOCAxMCA4IDEweiIvPjwvc3ZnPg==";
 
   return (
-    <div className="pdf-content" style={{ position: 'relative', height: '297mm', width: '210mm', overflow: 'hidden', padding: '10mm', boxSizing: 'border-box' }}>
+    <div className="pdf-base-styles pdf-cover-page-styles">
       {/* Main content wrapper - will take up most of the page */}
-      <div style={{ width: '100%', margin: '0 auto', display: 'flex', flexDirection: 'column', minHeight: 'calc(297mm - 20mm - 60pt)' }}> {/* Adjusted minHeight to account for footer height and padding */}
+      <div style={{ flexGrow: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-start' }}>
         {/* Logo aziendale in alto al centro */}
         <div style={{ textAlign: 'center', marginBottom: '20pt' }}>
           {agencyProfile?.agency_logo_url ? (
@@ -138,7 +138,7 @@ export const FalcoPDFCoverPage = ({ data, agencyProfile }: FalcoPDFCoverPageProp
       </div>
 
       {/* Footer aziendale per la prima pagina - Posizionato in modo assoluto */}
-      <div style={{ position: 'absolute', bottom: '10mm', left: '10mm', right: '10mm', textAlign: 'center', fontSize: '9pt', color: '#000', borderTop: '1pt solid #000', paddingTop: '10pt' }}>
+      <div className="cover-page-footer">
         {agencyProfile?.agency_name || "FALCO INVESTIGATION"} - {agencyProfile?.agency_address || "20124 MILANO (MI) – VIA SABAUDIA 8"} - Tel {agencyProfile?.agency_phone || "+39 02 82 19 79 69"}<br/>
         P.Iva IT11535690967 Autorizzazione Prefettura Milano Prot. 14816/12B15E Area I OSP<br/>
         {agencyProfile?.agency_email || "milano@falcoinvestigation.it"} - {agencyProfile?.agency_website || "WWW.INVESTIGATIONFALCO.IT"}
