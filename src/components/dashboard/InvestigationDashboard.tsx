@@ -87,7 +87,7 @@ export const InvestigationDashboard = () => {
     setIsExporting(true);
     toast({
       title: "Esportazione PDF",
-      description: "Preparazione del report per l'esportazione...",
+      description: "Generazione del report in corso...",
       duration: 3000,
     });
 
@@ -95,26 +95,28 @@ export const InvestigationDashboard = () => {
     let root: ReactDOM.Root | null = null;
 
     try {
-      // Creiamo un div temporaneo per il rendering
+      // Creiamo un contenitore temporaneo ottimizzato
       tempDiv = document.createElement('div');
       tempDiv.style.position = 'absolute';
-      tempDiv.style.top = '-9999px';
-      tempDiv.style.left = '-9999px';
-      tempDiv.style.width = '210mm'; // Larghezza A4
-      tempDiv.style.minHeight = '297mm'; // Altezza A4
+      tempDiv.style.top = '-99999px';
+      tempDiv.style.left = '-99999px';
+      tempDiv.style.width = '794px'; // Larghezza A4 in pixel (210mm)
+      tempDiv.style.height = 'auto';
       tempDiv.style.backgroundColor = 'white';
       tempDiv.style.fontFamily = 'Times New Roman, serif';
+      tempDiv.style.fontSize = '11pt';
+      tempDiv.style.overflow = 'visible';
       document.body.appendChild(tempDiv);
 
       root = ReactDOM.createRoot(tempDiv);
       
-      // Renderizziamo il template PDF
+      // Renderizziamo il nuovo template
       root.render(
         <FalcoPDFTemplate data={data} agencyProfile={agencyProfile} />
       );
 
-      // Aspettiamo che React renderizzi e le immagini si carichino
-      await new Promise(resolve => setTimeout(resolve, 6000));
+      // Tempo di attesa per il rendering e caricamento immagini
+      await new Promise(resolve => setTimeout(resolve, 8000)); // 8 secondi per sicurezza
 
       // Troviamo l'elemento da convertire
       const element = document.getElementById('falco-pdf-template');
@@ -122,20 +124,28 @@ export const InvestigationDashboard = () => {
         throw new Error('Elemento PDF template non trovato');
       }
 
-      // Assicuriamoci che l'elemento sia visibile
+      // Assicuriamoci che l'elemento sia completamente visibile
       element.style.display = 'block';
       element.style.visibility = 'visible';
+      element.style.opacity = '1';
 
-      // Opzioni ottimizzate per html2pdf
+      console.log('Elemento trovato, dimensioni:', {
+        width: element.offsetWidth,
+        height: element.offsetHeight,
+        scrollWidth: element.scrollWidth,
+        scrollHeight: element.scrollHeight
+      });
+
+      // Opzioni ottimizzate per la nuova struttura
       const options = {
-        margin: 0, // Nessun margine aggiuntivo, li gestiamo nel CSS
-        filename: `Report_Investigativo_${data.investigatedInfo.fullName.replace(/\s/g, '_') || 'Sconosciuto'}_${new Date().toISOString().split('T')[0]}.pdf`,
+        margin: 0, // Margini gestiti dal CSS
+        filename: `Report_Investigativo_${data.investigatedInfo.fullName?.replace(/\s/g, '_') || 'Sconosciuto'}_${new Date().toISOString().split('T')[0]}.pdf`,
         image: { 
           type: 'jpeg', 
-          quality: 0.95 
+          quality: 0.98 
         },
         html2canvas: { 
-          scale: 2, // Alta qualità
+          scale: 2, // Alta risoluzione
           useCORS: true,
           letterRendering: true,
           allowTaint: false,
@@ -146,15 +156,25 @@ export const InvestigationDashboard = () => {
           scrollY: 0,
           width: element.scrollWidth,
           height: element.scrollHeight,
-          windowWidth: 794, // Larghezza A4 in pixel (210mm a 96 DPI)
-          windowHeight: 1123, // Altezza A4 in pixel (297mm a 96 DPI)
+          windowWidth: 794, // A4 width in pixels
+          windowHeight: 1123, // A4 height in pixels
+          logging: false, // Disabilita i log per performance
           onclone: (clonedDoc: Document) => {
-            // Assicuriamoci che gli stili siano applicati nel documento clonato
+            // Ottimizzazioni nel documento clonato
             const clonedElement = clonedDoc.getElementById('falco-pdf-template');
             if (clonedElement) {
-              clonedElement.style.width = '210mm';
+              clonedElement.style.width = '794px';
               clonedElement.style.margin = '0';
               clonedElement.style.padding = '0';
+              clonedElement.style.transform = 'none';
+              
+              // Assicuriamoci che tutte le immagini siano caricate
+              const images = clonedElement.querySelectorAll('img');
+              images.forEach(img => {
+                if (img.complete && img.naturalWidth === 0) {
+                  img.style.display = 'none';
+                }
+              });
             }
           }
         },
@@ -163,14 +183,16 @@ export const InvestigationDashboard = () => {
           format: 'a4', 
           orientation: 'portrait',
           compress: true,
-          precision: 2
+          precision: 16
         },
         pagebreak: { 
           mode: ['avoid-all', 'css'],
           before: ['.page-break'],
-          avoid: ['.no-break', '.signature-section', '.header-info', '.photo-item']
+          avoid: ['.section', '.photo-grid', '.photo-row', '.signature-section', '.privacy-notes']
         }
       };
+
+      console.log('Avvio generazione PDF con opzioni:', options);
 
       // Generiamo il PDF
       await html2pdf().set(options).from(element).save();
@@ -178,26 +200,28 @@ export const InvestigationDashboard = () => {
       toast({
         title: "Successo",
         description: "Report PDF esportato con successo!",
+        duration: 5000,
       });
 
     } catch (error) {
       console.error('Errore durante l\'esportazione PDF:', error);
       toast({
         title: "Errore",
-        description: "Impossibile esportare il report PDF. Riprova.",
+        description: `Errore durante l'esportazione: ${error instanceof Error ? error.message : 'Errore sconosciuto'}`,
         variant: "destructive",
+        duration: 8000,
       });
     } finally {
       setIsExporting(false);
       
-      // Pulizia
-      if (root && tempDiv && tempDiv.parentNode) {
-        try {
+      // Pulizia accurata
+      try {
+        if (root && tempDiv && tempDiv.parentNode) {
           root.unmount();
           document.body.removeChild(tempDiv);
-        } catch (cleanupError) {
-          console.warn('Errore durante la pulizia:', cleanupError);
         }
+      } catch (cleanupError) {
+        console.warn('Errore durante la pulizia:', cleanupError);
       }
     }
   };
