@@ -34,114 +34,199 @@ export const FalcoPDFCoverPage = ({ data, agencyProfile }: FalcoPDFCoverPageProp
 
   const today = new Date().toISOString();
 
-  // Fallback logo embedded as a Base64 string (a simple shield icon)
-  const FALLBACK_LOGO_BASE64 = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIGNsYXNzPSJsdWNpZGUgbHVjaWRlLXnoaWVsZCI+PHBhdGggZD0iTTEyIDIyczgtNCA4LTEwVjVsLTgtMy04IDN2N2MwIDYgOCAxMCA4IDEweiIvPjwvc3ZnPg==";
+  // Logo di fallback migliorato
+  const FALLBACK_LOGO_BASE64 = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4MCIgaGVpZ2h0PSI4MCIgdmlld0JveD0iMCAwIDgwIDgwIiBmaWxsPSJub25lIj4KICA8Y2lyY2xlIGN4PSI0MCIgY3k9IjQwIiByPSIzOCIgZmlsbD0iIzJkM2E4NyIgc3Ryb2tlPSIjMTEyNTZhIiBzdHJva2Utd2lkdGg9IjQiLz4KICA8cGF0aCBkPSJNNDAgMTBzMTUgNSAxNSAyMHYxNWwtMTUgMTUtMTUtMTV2LTE1YzAtMTUgMTUtMjAgMTUtMjB6IiBmaWxsPSJ3aGl0ZSIvPgo8L3N2Z24K";
 
   return (
-    <div className="pdf-base-styles pdf-cover-page-styles">
-      {/* Main content wrapper - will take up most of the page */}
-      <div style={{ flexGrow: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-start' }}>
-        {/* Logo aziendale in alto al centro */}
-        <div style={{ textAlign: 'center', marginBottom: '20pt' }}>
+    <div style={{ 
+      height: '100%', 
+      display: 'flex', 
+      flexDirection: 'column', 
+      justifyContent: 'space-between',
+      padding: '0',
+      margin: '0'
+    }}>
+      {/* Contenuto principale della copertina */}
+      <div style={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
+        
+        {/* Logo aziendale centrato */}
+        <div className="text-center" style={{ marginBottom: '30pt' }}>
           {agencyProfile?.agency_logo_url ? (
-            <img
-              src={getProxyImageUrl(agencyProfile.agency_logo_url)}
-              alt={agencyProfile.agency_name || "Agency Logo"}
-              style={{ maxHeight: '120pt', marginBottom: '10pt', display: 'block', margin: '0 auto' }}
-              crossOrigin="anonymous"
+            <img 
+              src={getProxyImageUrl(agencyProfile.agency_logo_url)} 
+              alt="Logo Agenzia"
+              className="agency-logo"
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.src = FALLBACK_LOGO_BASE64;
+              }}
             />
           ) : (
-            <img
-              src={FALLBACK_LOGO_BASE64}
-              alt="Falco Investigation Logo"
-              style={{ maxHeight: '120pt', marginBottom: '10pt', display: 'block', margin: '0 auto' }}
-              crossOrigin="anonymous"
+            <img 
+              src={FALLBACK_LOGO_BASE64} 
+              alt="Logo Predefinito"
+              className="agency-logo"
             />
           )}
-          <div className="company-name">{agencyProfile?.agency_name || "FALCO INVESTIGATION"}</div>
-          <div className="company-subtitle">INVESTIGAZIONI-INDAGINI-RICERCHE</div>
         </div>
 
-        {/* Data e luogo in alto a sinistra, Mandante in alto a destra */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', marginBottom: '30pt', fontSize: '11pt' }}>
-          <div style={{ textAlign: 'left' }}>
-            Milano, {formatDateLong(today)}
+        {/* Informazioni agenzia centrate */}
+        {agencyProfile && (
+          <div className="header-info">
+            <div style={{ fontSize: '14pt', fontWeight: 'bold', marginBottom: '5pt' }}>
+              {agencyProfile.agency_name}
+            </div>
+            <div style={{ fontSize: '10pt', marginBottom: '3pt' }}>
+              {agencyProfile.agency_address}
+            </div>
+            <div style={{ fontSize: '10pt', marginBottom: '3pt' }}>
+              Tel: {agencyProfile.agency_phone} | Email: {agencyProfile.agency_email}
+            </div>
+            {agencyProfile.agency_website && (
+              <div style={{ fontSize: '10pt' }}>
+                Web: {agencyProfile.agency_website}
+              </div>
+            )}
           </div>
-          {data.clientInfo.fullName && (
-            <div style={{ textAlign: 'right' }}>
-              Spett.le {data.clientInfo.fullName}<br/>
-              {data.clientInfo.address}<br/>
-            </div>
-          )}
+        )}
+
+        {/* Titolo principale centrato */}
+        <div className="title-center" style={{ margin: '40pt 0' }}>
+          <h1 style={{ 
+            fontSize: '24pt', 
+            fontWeight: 'bold', 
+            marginBottom: '10pt',
+            textTransform: 'uppercase',
+            letterSpacing: '2pt',
+            color: '#000'
+          }}>
+            REPORT INVESTIGATIVO
+          </h1>
+          <div style={{ 
+            fontSize: '14pt', 
+            fontWeight: 'bold',
+            color: '#333',
+            marginTop: '20pt'
+          }}>
+            Oggetto: {data.mandateDetails?.mandateObject || 'Non specificato'}
+          </div>
         </div>
 
-        {/* Titolo report */}
-        <div className="report-title">REPORT INVESTIGATIVO</div>
-
-        {/* Sezioni del report */}
-        <div className="section-title">GENERALITÀ DEL MANDANTE</div>
-        <div className="section-content no-break">
-          <strong>Sig.ra/Sig. {data.clientInfo.fullName}</strong> 
-          {data.clientInfo.birthPlace && data.clientInfo.birthDate && 
-            ` nata/o a ${data.clientInfo.birthPlace} il ${formatDate(data.clientInfo.birthDate)}`
-          }
-          {data.clientInfo.address && ` e residente in ${data.clientInfo.address}`}
-          {data.clientInfo.documentNumber && 
-            `, identificata/o a mezzo ${data.clientInfo.documentType.toLowerCase()} n° ${data.clientInfo.documentNumber}.`
-          }
+        {/* Informazioni principali centrate */}
+        <div style={{ 
+          textAlign: 'center', 
+          margin: '30pt auto',
+          maxWidth: '400pt'
+        }}>
+          <table style={{ 
+            width: '100%', 
+            borderCollapse: 'collapse',
+            margin: '0 auto'
+          }}>
+            <tr>
+              <td style={{ 
+                padding: '8pt', 
+                borderBottom: '1pt solid #ccc',
+                fontWeight: 'bold',
+                textAlign: 'left',
+                width: '40%'
+              }}>
+                Cliente:
+              </td>
+              <td style={{ 
+                padding: '8pt', 
+                borderBottom: '1pt solid #ccc',
+                textAlign: 'left'
+              }}>
+                {data.clientInfo?.fullName || 'Non specificato'}
+              </td>
+            </tr>
+            <tr>
+              <td style={{ 
+                padding: '8pt', 
+                borderBottom: '1pt solid #ccc',
+                fontWeight: 'bold',
+                textAlign: 'left'
+              }}>
+                Soggetto:
+              </td>
+              <td style={{ 
+                padding: '8pt', 
+                borderBottom: '1pt solid #ccc',
+                textAlign: 'left'
+              }}>
+                {data.investigatedInfo?.fullName || 'Non specificato'}
+              </td>
+            </tr>
+            <tr>
+              <td style={{ 
+                padding: '8pt', 
+                borderBottom: '1pt solid #ccc',
+                fontWeight: 'bold',
+                textAlign: 'left'
+              }}>
+                Periodo:
+              </td>
+              <td style={{ 
+                padding: '8pt', 
+                borderBottom: '1pt solid #ccc',
+                textAlign: 'left'
+              }}>
+                {data.mandateDetails?.startDate && data.mandateDetails?.endDate
+                  ? `${formatDate(data.mandateDetails.startDate)} - ${formatDate(data.mandateDetails.endDate)}`
+                  : 'Non specificato'
+                }
+              </td>
+            </tr>
+            <tr>
+              <td style={{ 
+                padding: '8pt', 
+                fontWeight: 'bold',
+                textAlign: 'left'
+              }}>
+                Data Report:
+              </td>
+              <td style={{ 
+                padding: '8pt', 
+                textAlign: 'left'
+              }}>
+                {formatDateLong(today)}
+              </td>
+            </tr>
+          </table>
         </div>
 
-        {data.investigatedInfo.fullName && (
-          <>
-            <div className="section-title">PERSONA DI CUI SI CHIEDE L’OSSERVAZIONE</div>
-            <div className="section-content no-break">
-              <strong>{data.investigatedInfo.fullName}</strong>
-              {data.investigatedInfo.birthPlace && data.investigatedInfo.birthDate && 
-                `, nato/a a ${data.investigatedInfo.birthPlace} il ${formatDate(data.investigatedInfo.birthDate)}`
-              }
-              {data.investigatedInfo.address && ` e residente a ${data.investigatedInfo.address}`}
-              , di seguito indicata come <strong>“osservato”</strong>.
-            </div>
-          </>
-        )}
-
-        {data.mandateDetails.assignmentDate && (
-          <>
-            <div className="section-title">DATA DELL’INCARICO</div>
-            <div className="section-content no-break">
-              {formatDate(data.mandateDetails.assignmentDate)}
-            </div>
-          </>
-        )}
-
-        {(data.mandateDetails.purpose || data.mandateDetails.protectedRights || data.investigatedInfo.vehicles.length > 0) && (
-          <>
-            <div className="section-title">FINALITÀ DEL MANDATO E DIRITTO CHE SI INTENDE TUTELARE</div>
-            <div className="section-content">
-              {data.mandateDetails.purpose && <p>{data.mandateDetails.purpose}</p>}
-              {data.mandateDetails.protectedRights && <p>{data.mandateDetails.protectedRights}</p>}
-              {data.investigatedInfo.vehicles.length > 0 && (
-                <div style={{ marginTop: '10pt' }}>
-                  <p>L’osservato è solito utilizzare per i suoi spostamenti l’autovettura:</p>
-                  <ul style={{ listStyleType: 'disc', marginLeft: '20pt' }}>
-                    {data.investigatedInfo.vehicles.map((vehicle, index) => (
-                      <li key={index}>
-                        {vehicle.model} di colore {vehicle.color} targato {vehicle.licensePlate}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </div>
-          </>
-        )}
+        {/* Nota di riservatezza centrata */}
+        <div style={{ 
+          textAlign: 'center',
+          marginTop: 'auto',
+          marginBottom: '20pt',
+          fontSize: '10pt',
+          fontStyle: 'italic',
+          color: '#666',
+          maxWidth: '400pt',
+          margin: 'auto auto 20pt auto'
+        }}>
+          <div style={{ 
+            border: '1pt solid #ccc',
+            padding: '10pt',
+            backgroundColor: '#f9f9f9'
+          }}>
+            <strong>DOCUMENTO RISERVATO</strong><br />
+            Il presente documento contiene informazioni riservate e confidenziali.<br />
+            È vietata la riproduzione anche parziale senza autorizzazione scritta.
+          </div>
+        </div>
       </div>
 
-      {/* Footer aziendale per la prima pagina - Posizionato in modo assoluto */}
+      {/* Footer della copertina */}
       <div className="cover-page-footer">
-        {agencyProfile?.agency_name || "FALCO INVESTIGATION"} - {agencyProfile?.agency_address || "20124 MILANO (MI) – VIA SABAUDIA 8"} - Tel {agencyProfile?.agency_phone || "+39 02 82 19 79 69"}<br/>
-        P.Iva IT11535690967 Autorizzazione Prefettura Milano Prot. 14816/12B15E Area I OSP<br/>
-        {agencyProfile?.agency_email || "milano@falcoinvestigation.it"} - {agencyProfile?.agency_website || "WWW.INVESTIGATIONFALCO.IT"}
+        <div style={{ fontSize: '9pt', color: '#666' }}>
+          Investigatore: {agencyProfile ? `${agencyProfile.first_name} ${agencyProfile.last_name}` : 'Non specificato'}
+        </div>
+        <div style={{ fontSize: '8pt', color: '#999', marginTop: '5pt' }}>
+          Report generato il {formatDateLong(today)}
+        </div>
       </div>
     </div>
   );

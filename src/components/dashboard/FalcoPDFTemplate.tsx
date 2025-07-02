@@ -24,127 +24,231 @@ export const FalcoPDFTemplate = ({ data, agencyProfile }: FalcoPDFTemplateProps)
       <style>{`
         @page {
           size: A4;
-          margin: 10mm; /* Margini standard per tutte le pagine */
+          margin: 15mm;
         }
         
-        body {
-          -webkit-print-color-adjust: exact; /* For Chrome/Safari */
-          print-color-adjust: exact; /* Standard */
+        @media print {
+          body {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+            margin: 0 !important;
+            padding: 0 !important;
+          }
         }
 
-        /* Stili base per tutti i contenuti del PDF (copertina e report) */
+        /* Reset di base per il PDF */
+        #falco-pdf-template {
+          margin: 0 !important;
+          padding: 0 !important;
+          width: 210mm !important;
+          min-height: 297mm !important;
+          font-family: 'Times New Roman', serif !important;
+          font-size: 11pt !important;
+          line-height: 1.4 !important;
+          color: #000 !important;
+          background: white !important;
+          box-sizing: border-box !important;
+          position: relative !important;
+        }
+
+        /* Contenitore per centrare tutto il contenuto */
+        .pdf-container {
+          width: 100% !important;
+          max-width: 180mm !important; /* Larghezza contenuto meno margini */
+          margin: 0 auto !important;
+          padding: 0 !important;
+          box-sizing: border-box !important;
+        }
+
+        /* Stili base per tutti i contenuti del PDF */
         .pdf-base-styles {
-          font-family: 'Times New Roman', serif;
-          font-size: 11pt;
-          line-height: 1.4;
-          color: #000;
-          background: white;
-          width: 210mm; /* Larghezza A4 esplicita */
-          box-sizing: border-box; /* Includi padding/border nella larghezza/altezza */
-          padding: 10mm; /* Applica i margini della pagina come padding interno */
+          width: 100% !important;
+          margin: 0 auto !important;
+          padding: 0 !important;
+          font-family: 'Times New Roman', serif !important;
+          font-size: 11pt !important;
+          line-height: 1.4 !important;
+          color: #000 !important;
+          background: white !important;
+          box-sizing: border-box !important;
         }
 
         /* Stili specifici per la pagina di copertina */
         .pdf-cover-page-styles {
-          height: 297mm; /* Altezza A4 esplicita per la copertina */
-          position: relative; /* Necessario per il posizionamento assoluto del footer */
-          overflow: hidden; /* Nascondi qualsiasi cosa vada oltre le dimensioni A4 */
-          display: flex; /* Usa flexbox per distribuire il contenuto */
-          flex-direction: column;
-          justify-content: space-between; /* Spinge il contenuto in alto e il footer in basso */
+          min-height: 267mm !important; /* Altezza A4 meno margini */
+          position: relative !important;
+          display: flex !important;
+          flex-direction: column !important;
+          justify-content: space-between !important;
+          page-break-after: always !important;
         }
 
-        /* Stili per il footer della pagina di copertina */
-        .cover-page-footer {
-          text-align: center;
-          font-size: 9pt;
-          color: #000;
-          border-top: 1pt solid #000;
-          padding-top: 10pt;
-          width: calc(100% - 20mm); /* Larghezza del contenuto meno i margini laterali */
-          position: absolute;
-          bottom: 10mm; /* Posiziona a 10mm dal fondo della pagina */
-          left: 10mm; /* Posiziona a 10mm dal bordo sinistro */
-          right: 10mm; /* Posiziona a 10mm dal bordo destro */
-          box-sizing: border-box;
+        /* Stili per il contenuto del report */
+        .pdf-report-content-styles {
+          width: 100% !important;
+          margin: 0 !important;
+          padding: 0 !important;
         }
-        
+
+        /* Header info centrato */
         .header-info {
-          font-size: 9pt;
-          text-align: center;
-          margin-bottom: 15pt;
-          border-bottom: 1pt solid #000;
-          padding-bottom: 10pt;
-        }
-        
-        .company-name {
-          font-size: 16pt;
-          font-weight: bold;
-          letter-spacing: 2pt;
-          text-align: center;
-          margin: 20pt 0 5pt 0;
-        }
-        
-        .company-subtitle {
-          font-size: 10pt;
-          letter-spacing: 1pt;
-          text-align: center;
-        }
-        
-        .report-title {
-          font-size: 18pt;
-          font-weight: bold;
-          text-align: center;
-          margin: 30pt 0 20pt 0;
-          letter-spacing: 1pt;
-        }
-        
-        .section-title {
-          font-size: 12pt;
-          font-weight: bold;
-          text-align: center;
-          margin: 20pt 0 10pt 0;
-          text-decoration: underline;
-        }
-        
-        .section-content {
-          margin-bottom: 15pt;
-          text-align: justify;
-          line-height: 1.5;
-        }
-        
-        .observation-date {
-          font-weight: bold;
-          text-decoration: underline;
-          margin: 15pt 0 8pt 0;
-        }
-        
-        .page-break {
-          page-break-before: always;
-        }
-        
-        .no-break {
-          page-break-inside: avoid;
-        }
-        
-        .signature-section {
-          margin-top: 40pt;
-          text-align: right;
-          page-break-inside: avoid;
+          font-size: 9pt !important;
+          text-align: center !important;
+          margin: 0 auto 15pt auto !important;
+          border-bottom: 1pt solid #000 !important;
+          padding-bottom: 10pt !important;
+          width: 100% !important;
         }
 
-        /* Pagination style */
-        @page {
-          @bottom-right {
-            content: "Pag. " counter(page) " a " counter(pages);
-            font-size: 9pt;
-          }
+        /* Footer della copertina */
+        .cover-page-footer {
+          text-align: center !important;
+          font-size: 9pt !important;
+          color: #000 !important;
+          border-top: 1pt solid #000 !important;
+          padding-top: 10pt !important;
+          margin-top: auto !important;
+          width: 100% !important;
         }
+
+        /* Centratura dei titoli */
+        .title-center {
+          text-align: center !important;
+          margin: 0 auto !important;
+          width: 100% !important;
+        }
+
+        /* Immagini responsive e centrate */
+        .pdf-image {
+          max-width: 100% !important;
+          height: auto !important;
+          display: block !important;
+          margin: 0 auto !important;
+        }
+
+        /* Logo aziendale */
+        .agency-logo {
+          max-width: 80px !important;
+          max-height: 80px !important;
+          margin: 0 auto 20pt auto !important;
+          display: block !important;
+        }
+
+        /* Sezioni del report */
+        .report-section {
+          margin-bottom: 20pt !important;
+          width: 100% !important;
+          page-break-inside: avoid !important;
+        }
+
+        .report-section h2 {
+          font-size: 14pt !important;
+          font-weight: bold !important;
+          margin-bottom: 10pt !important;
+          text-align: center !important;
+          color: #000 !important;
+        }
+
+        .report-section h3 {
+          font-size: 12pt !important;
+          font-weight: bold !important;
+          margin-bottom: 8pt !important;
+          color: #000 !important;
+        }
+
+        /* Tabelle */
+        .pdf-table {
+          width: 100% !important;
+          border-collapse: collapse !important;
+          margin: 10pt 0 !important;
+        }
+
+        .pdf-table th,
+        .pdf-table td {
+          border: 1pt solid #000 !important;
+          padding: 5pt !important;
+          text-align: left !important;
+          font-size: 10pt !important;
+        }
+
+        .pdf-table th {
+          background-color: #f0f0f0 !important;
+          font-weight: bold !important;
+        }
+
+        /* Foto griglia */
+        .photo-grid {
+          display: grid !important;
+          grid-template-columns: repeat(2, 1fr) !important;
+          gap: 10pt !important;
+          margin: 10pt 0 !important;
+          width: 100% !important;
+        }
+
+        .photo-item {
+          text-align: center !important;
+          page-break-inside: avoid !important;
+        }
+
+        .photo-item img {
+          max-width: 100% !important;
+          height: auto !important;
+          border: 1pt solid #ccc !important;
+        }
+
+        .photo-caption {
+          font-size: 9pt !important;
+          margin-top: 5pt !important;
+          font-style: italic !important;
+        }
+
+        /* Page breaks */
+        .page-break {
+          page-break-before: always !important;
+        }
+
+        .no-break {
+          page-break-inside: avoid !important;
+        }
+
+        /* Firma sezione */
+        .signature-section {
+          margin-top: 30pt !important;
+          page-break-inside: avoid !important;
+        }
+
+        .signature-line {
+          border-bottom: 1pt solid #000 !important;
+          width: 200pt !important;
+          margin: 20pt auto 5pt auto !important;
+          display: block !important;
+        }
+
+        .signature-label {
+          text-align: center !important;
+          font-size: 10pt !important;
+          margin-top: 5pt !important;
+        }
+
+        /* Utility classes */
+        .text-center { text-align: center !important; }
+        .text-left { text-align: left !important; }
+        .text-right { text-align: right !important; }
+        .font-bold { font-weight: bold !important; }
+        .font-italic { font-style: italic !important; }
       `}</style>
-      
-      <FalcoPDFCoverPage data={data} agencyProfile={agencyProfile} />
-      <div className="page-break"></div>
-      <FalcoPDFReportContent data={data} agencyProfile={agencyProfile} />
+
+      <div className="pdf-container">
+        {/* Pagina di copertina */}
+        <div className="pdf-base-styles pdf-cover-page-styles">
+          <FalcoPDFCoverPage data={data} agencyProfile={agencyProfile} />
+        </div>
+
+        {/* Contenuto del report */}
+        <div className="pdf-base-styles pdf-report-content-styles">
+          <FalcoPDFReportContent data={data} agencyProfile={agencyProfile} />
+        </div>
+      </div>
     </div>
   );
 };

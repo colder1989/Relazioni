@@ -4,17 +4,17 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { FileText, Download, Eye, Plus, CheckCircle, Clock, AlertCircle, Shield, Search, LogOut, UserCircle, Loader2 } from 'lucide-react';
-import { ClientInfoSection } from './dashboard/ClientInfoSection';
-import { InvestigatedInfoSection } from './dashboard/InvestigatedInfoSection';
-import { MandateDetailsSection } from './dashboard/MandateDetailsSection';
-import { ObservationDaysSection } from './dashboard/ObservationDaysSection';
-import { PhotosSection } from './dashboard/PhotosSection';
-import { AdditionalNotesSection } from './dashboard/AdditionalNotesSection';
-import { PhotoManagementSection } from './dashboard/PhotoManagementSection';
-import { ConclusionsSection } from './dashboard/ConclusionsSection';
-import { PrivacySection } from './dashboard/PrivacySection';
-import { ReportPreview } from './dashboard/ReportPreview';
-import { FalcoPDFTemplate } from './dashboard/FalcoPDFTemplate';
+import { ClientInfoSection } from './ClientInfoSection';
+import { InvestigatedInfoSection } from './InvestigatedInfoSection';
+import { MandateDetailsSection } from './MandateDetailsSection';
+import { ObservationDaysSection } from './ObservationDaysSection';
+import { PhotosSection } from './PhotosSection';
+import { AdditionalNotesSection } from './AdditionalNotesSection';
+import { PhotoManagementSection } from './PhotoManagementSection';
+import { ConclusionsSection } from './ConclusionsSection';
+import { PrivacySection } from './PrivacySection';
+import { ReportPreview } from './ReportPreview';
+import { FalcoPDFTemplate } from './FalcoPDFTemplate';
 import { useInvestigationData, Photo } from '@/hooks/useInvestigationData';
 import { useSession } from '@/components/SessionContextProvider';
 import { supabase } from '@/integrations/supabase/client';
@@ -75,6 +75,15 @@ export const InvestigationDashboard = () => {
   }, [session, isSessionLoading]);
 
   const handleDirectExportPDF = async () => {
+    if (!data || !agencyProfile) {
+      toast({
+        title: "Errore",
+        description: "Dati non disponibili per l'esportazione.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsExporting(true);
     toast({
       title: "Esportazione PDF",
@@ -86,79 +95,109 @@ export const InvestigationDashboard = () => {
     let root: ReactDOM.Root | null = null;
 
     try {
+      // Creiamo un div temporaneo per il rendering
       tempDiv = document.createElement('div');
+      tempDiv.style.position = 'absolute';
+      tempDiv.style.top = '-9999px';
+      tempDiv.style.left = '-9999px';
+      tempDiv.style.width = '210mm'; // Larghezza A4
+      tempDiv.style.minHeight = '297mm'; // Altezza A4
+      tempDiv.style.backgroundColor = 'white';
+      tempDiv.style.fontFamily = 'Times New Roman, serif';
       document.body.appendChild(tempDiv);
 
       root = ReactDOM.createRoot(tempDiv);
-      // Render the FalcoPDFTemplate into the temporary div
+      
+      // Renderizziamo il template PDF
       root.render(
         <FalcoPDFTemplate data={data} agencyProfile={agencyProfile} />
       );
 
-      // Give React time to render and images to load
-      await new Promise(resolve => setTimeout(resolve, 5000)); // Aumentato a 5 secondi
+      // Aspettiamo che React renderizzi e le immagini si carichino
+      await new Promise(resolve => setTimeout(resolve, 6000));
 
-      // Ensure the element is visible for html2pdf.js to capture it correctly
+      // Troviamo l'elemento da convertire
       const element = document.getElementById('falco-pdf-template');
-      if (element) {
-        element.style.display = 'block';
+      if (!element) {
+        throw new Error('Elemento PDF template non trovato');
       }
 
-      console.log("Content of tempDiv before PDF generation:", tempDiv.innerHTML);
+      // Assicuriamoci che l'elemento sia visibile
+      element.style.display = 'block';
+      element.style.visibility = 'visible';
 
+      // Opzioni ottimizzate per html2pdf
       const options = {
-        margin: [10, 10, 15, 10], // Margini in mm
+        margin: 0, // Nessun margine aggiuntivo, li gestiamo nel CSS
         filename: `Report_Investigativo_${data.investigatedInfo.fullName.replace(/\s/g, '_') || 'Sconosciuto'}_${new Date().toISOString().split('T')[0]}.pdf`,
         image: { 
           type: 'jpeg', 
-          quality: 0.98 
+          quality: 0.95 
         },
         html2canvas: { 
-          scale: 2,
+          scale: 2, // Alta qualità
           useCORS: true,
           letterRendering: true,
           allowTaint: false,
           backgroundColor: '#ffffff',
-          // height: window.innerHeight, // These can cause issues with multi-page documents
-          // width: window.innerWidth // These can cause issues with multi-page documents
+          x: 0,
+          y: 0,
+          scrollX: 0,
+          scrollY: 0,
+          width: element.scrollWidth,
+          height: element.scrollHeight,
+          windowWidth: 794, // Larghezza A4 in pixel (210mm a 96 DPI)
+          windowHeight: 1123, // Altezza A4 in pixel (297mm a 96 DPI)
+          onclone: (clonedDoc: Document) => {
+            // Assicuriamoci che gli stili siano applicati nel documento clonato
+            const clonedElement = clonedDoc.getElementById('falco-pdf-template');
+            if (clonedElement) {
+              clonedElement.style.width = '210mm';
+              clonedElement.style.margin = '0';
+              clonedElement.style.padding = '0';
+            }
+          }
         },
         jsPDF: { 
           unit: 'mm', 
           format: 'a4', 
           orientation: 'portrait',
-          compress: true
+          compress: true,
+          precision: 2
         },
         pagebreak: { 
-          mode: ['avoid-all', 'css', 'legacy'],
-          before: '.page-break',
-          avoid: ['.no-break', '.signature-section', '.header-info']
-        },
-        mode: 'html' // Keep HTML mode for selectable text
+          mode: ['avoid-all', 'css'],
+          before: ['.page-break'],
+          avoid: ['.no-break', '.signature-section', '.header-info', '.photo-item']
+        }
       };
 
+      // Generiamo il PDF
       await html2pdf().set(options).from(element).save();
-      
+
       toast({
         title: "Successo",
         description: "Report PDF esportato con successo!",
       });
+
     } catch (error) {
-      console.error('Error exporting PDF:', error);
+      console.error('Errore durante l\'esportazione PDF:', error);
       toast({
         title: "Errore",
-        description: "Impossibile esportare il report PDF.",
+        description: "Impossibile esportare il report PDF. Riprova.",
         variant: "destructive",
       });
     } finally {
       setIsExporting(false);
+      
+      // Pulizia
       if (root && tempDiv && tempDiv.parentNode) {
-        root.unmount();
-        document.body.removeChild(tempDiv);
-      }
-      // Ensure the element is hidden again
-      const element = document.getElementById('falco-pdf-template');
-      if (element) {
-        element.style.display = 'none';
+        try {
+          root.unmount();
+          document.body.removeChild(tempDiv);
+        } catch (cleanupError) {
+          console.warn('Errore durante la pulizia:', cleanupError);
+        }
       }
     }
   };
