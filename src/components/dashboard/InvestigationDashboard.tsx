@@ -85,7 +85,7 @@ export const InvestigationDashboard = () => {
     setIsExporting(true);
     toast({
       title: "Esportazione PDF",
-      description: "Generazione del report in corso...",
+      description: "Preparazione del report...",
       duration: 3000,
     });
 
@@ -93,83 +93,70 @@ export const InvestigationDashboard = () => {
     let root: ReactDOM.Root | null = null;
 
     try {
-      // Creiamo un contenitore temporaneo ottimizzato
+      // Creiamo un contenitore temporaneo semplificato
       tempDiv = document.createElement('div');
       tempDiv.style.position = 'absolute';
       tempDiv.style.top = '-99999px';
       tempDiv.style.left = '-99999px';
-      tempDiv.style.width = '794px'; // Larghezza A4 in pixel (210mm)
-      tempDiv.style.height = 'auto';
+      tempDiv.style.width = '210mm';
       tempDiv.style.backgroundColor = 'white';
       tempDiv.style.fontFamily = 'Times New Roman, serif';
-      tempDiv.style.fontSize = '11pt';
       tempDiv.style.overflow = 'visible';
       document.body.appendChild(tempDiv);
 
       root = ReactDOM.createRoot(tempDiv);
       
-      // Renderizziamo il nuovo template
+      // Renderizziamo il template esistente
       root.render(
         <FalcoPDFTemplate data={data} agencyProfile={agencyProfile} />
       );
 
-      // Tempo di attesa per il rendering e caricamento immagini
-      await new Promise(resolve => setTimeout(resolve, 8000)); // 8 secondi per sicurezza
+      // Aspettiamo il rendering
+      await new Promise(resolve => setTimeout(resolve, 5000));
 
-      // Troviamo l'elemento da convertire
+      // Troviamo l'elemento
       const element = document.getElementById('falco-pdf-template');
       if (!element) {
         throw new Error('Elemento PDF template non trovato');
       }
 
-      // Assicuriamoci che l'elemento sia completamente visibile
+      // Rendiamo visibile l'elemento
       element.style.display = 'block';
       element.style.visibility = 'visible';
-      element.style.opacity = '1';
 
-      console.log('Elemento trovato, dimensioni:', {
+      console.log('Elemento trovato per export PDF:', {
         width: element.offsetWidth,
-        height: element.offsetHeight,
-        scrollWidth: element.scrollWidth,
-        scrollHeight: element.scrollHeight
+        height: element.offsetHeight
       });
 
-      // Opzioni ottimizzate per la nuova struttura
+      // Opzioni PDF semplificate ma efficaci
       const options = {
-        margin: 0, // Margini gestiti dal CSS
-        filename: `Report_Investigativo_${data.investigatedInfo.fullName?.replace(/\s/g, '_') || 'Sconosciuto'}_${new Date().toISOString().split('T')[0]}.pdf`,
+        margin: [15, 15, 15, 15], // Margini in mm: top, left, bottom, right
+        filename: `Report_Investigativo_${data.investigatedInfo?.fullName?.replace(/\s/g, '_') || 'Report'}_${new Date().toISOString().split('T')[0]}.pdf`,
         image: { 
           type: 'jpeg', 
-          quality: 0.98 
+          quality: 0.95 
         },
         html2canvas: { 
-          scale: 2, // Alta risoluzione
+          scale: 1.5, // Buona qualità senza essere troppo pesante
           useCORS: true,
           letterRendering: true,
           allowTaint: false,
           backgroundColor: '#ffffff',
-          x: 0,
-          y: 0,
-          scrollX: 0,
-          scrollY: 0,
-          width: element.scrollWidth,
-          height: element.scrollHeight,
           windowWidth: 794, // A4 width in pixels
           windowHeight: 1123, // A4 height in pixels
-          logging: false, // Disabilita i log per performance
           onclone: (clonedDoc: Document) => {
-            // Ottimizzazioni nel documento clonato
+            // Piccole ottimizzazioni nel clone
             const clonedElement = clonedDoc.getElementById('falco-pdf-template');
             if (clonedElement) {
-              clonedElement.style.width = '794px';
-              clonedElement.style.margin = '0';
-              clonedElement.style.padding = '0';
-              clonedElement.style.transform = 'none';
+              // Assicuriamoci che il contenitore sia ben centrato
+              clonedElement.style.margin = '0 auto';
+              clonedElement.style.maxWidth = '180mm';
               
-              // Assicuriamoci che tutte le immagini siano caricate
+              // Nascondi immagini non caricate
               const images = clonedElement.querySelectorAll('img');
               images.forEach(img => {
-                if (img.complete && img.naturalWidth === 0) {
+                if (!img.complete || img.naturalWidth === 0) {
                   img.style.display = 'none';
                 }
               });
@@ -180,29 +167,28 @@ export const InvestigationDashboard = () => {
           unit: 'mm', 
           format: 'a4', 
           orientation: 'portrait',
-          compress: true,
-          precision: 16
+          compress: true
         },
         pagebreak: { 
           mode: ['avoid-all', 'css'],
           before: ['.page-break'],
-          avoid: ['.section', '.photo-grid', '.photo-row', '.signature-section', '.privacy-notes']
+          avoid: ['.no-break', '.signature-section', '.header-info']
         }
       };
 
-      console.log('Avvio generazione PDF con opzioni:', options);
+      console.log('Avvio generazione PDF...');
 
       // Generiamo il PDF
       await html2pdf().set(options).from(element).save();
 
       toast({
-        title: "Successo",
-        description: "Report PDF esportato con successo!",
+        title: "Successo!",
+        description: "Report PDF esportato con successo",
         duration: 5000,
       });
 
     } catch (error) {
-      console.error('Errore durante l\'esportazione PDF:', error);
+      console.error('Errore esportazione PDF:', error);
       toast({
         title: "Errore",
         description: `Errore durante l'esportazione: ${error instanceof Error ? error.message : 'Errore sconosciuto'}`,
@@ -212,14 +198,14 @@ export const InvestigationDashboard = () => {
     } finally {
       setIsExporting(false);
       
-      // Pulizia accurata
+      // Pulizia
       try {
         if (root && tempDiv && tempDiv.parentNode) {
           root.unmount();
           document.body.removeChild(tempDiv);
         }
       } catch (cleanupError) {
-        console.warn('Errore durante la pulizia:', cleanupError);
+        console.warn('Errore pulizia:', cleanupError);
       }
     }
   };
